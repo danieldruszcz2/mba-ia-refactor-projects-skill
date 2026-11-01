@@ -1,4 +1,6 @@
 @baseUrl = http://localhost:3000
+# Rotas admin exigem ENABLE_ADMIN_ROUTES=true e ADMIN_TOKEN no servidor
+@adminToken = troque-me
 
 ### Checkout - sucesso
 POST {{baseUrl}}/api/checkout
@@ -26,6 +28,8 @@ Content-Type: application/json
 
 ### Relatório financeiro administrativo
 GET {{baseUrl}}/api/admin/financial-report
+Authorization: Bearer {{adminToken}}
 
 ### Deletar usuário
 DELETE {{baseUrl}}/api/users/1
+Authorization: Bearer {{adminToken}}

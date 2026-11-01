@@ -1,0 +1,292 @@
+{
+  "info": {
+    "name": "Task Manager API",
+    "description": "Collection para testar a API Flask do task-manager-api. Rode `python seed.py` e depois `python app.py` antes (http://localhost:5000).\n\nAs requisições de criação (POST) salvam o id retornado nas variáveis da collection (`taskId`, `userId`, `categoryId`), então dá para encadear criar → buscar → atualizar → deletar.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:5000" },
+    { "key": "taskId", "value": "1" },
+    { "key": "userId", "value": "1" },
+    { "key": "categoryId", "value": "1" },
+    { "key": "token", "value": "" }
+  ],
+  "item": [
+    {
+      "name": "Geral",
+      "item": [
+        {
+          "name": "Index",
+          "request": { "method": "GET", "url": "{{baseUrl}}/" }
+        },
+        {
+          "name": "Health check",
+          "request": { "method": "GET", "url": "{{baseUrl}}/health" }
+        }
+      ]
+    },
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "  const body = pm.response.json();",
+                  "  pm.collectionVariables.set('token', body.token);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"joao@email.com\",\n  \"password\": \"1234\"\n}"
+            },
+            "url": "{{baseUrl}}/login"
+          }
+        },
+        {
+          "name": "Login - credenciais inválidas",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"joao@email.com\",\n  \"password\": \"senha-errada\"\n}"
+            },
+            "url": "{{baseUrl}}/login"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Tasks",
+      "item": [
+        {
+          "name": "Listar tasks",
+          "request": { "method": "GET", "url": "{{baseUrl}}/tasks" }
+        },
+        {
+          "name": "Buscar task por id",
+          "request": { "method": "GET", "url": "{{baseUrl}}/tasks/{{taskId}}" }
+        },
+        {
+          "name": "Buscar tasks (filtros)",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/tasks/search?q=api&status=pending&priority=2&user_id=1",
+              "host": ["{{baseUrl}}"],
+              "path": ["tasks", "search"],
+              "query": [
+                { "key": "q", "value": "api", "description": "Texto buscado em title/description" },
+                { "key": "status", "value": "pending", "description": "pending | in_progress | done | cancelled" },
+                { "key": "priority", "value": "2", "description": "1 (crítica) a 5 (mínima)" },
+                { "key": "user_id", "value": "1" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Estatísticas de tasks",
+          "request": { "method": "GET", "url": "{{baseUrl}}/tasks/stats" }
+        },
+        {
+          "name": "Criar task",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "  pm.collectionVariables.set('taskId', pm.response.json().id);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Escrever testes de integração\",\n  \"description\": \"Cobrir os endpoints de tasks\",\n  \"status\": \"pending\",\n  \"priority\": 2,\n  \"user_id\": 1,\n  \"category_id\": 1,\n  \"due_date\": \"2026-12-31\",\n  \"tags\": [\"testes\", \"backend\"]\n}"
+            },
+            "url": "{{baseUrl}}/tasks"
+          }
+        },
+        {
+          "name": "Criar task - título inválido",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"ab\"\n}"
+            },
+            "url": "{{baseUrl}}/tasks"
+          }
+        },
+        {
+          "name": "Atualizar task",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"in_progress\",\n  \"priority\": 1,\n  \"due_date\": \"2026-11-30\",\n  \"tags\": [\"testes\", \"urgente\"]\n}"
+            },
+            "url": "{{baseUrl}}/tasks/{{taskId}}"
+          }
+        },
+        {
+          "name": "Deletar task",
+          "request": { "method": "DELETE", "url": "{{baseUrl}}/tasks/{{taskId}}" }
+        }
+      ]
+    },
+    {
+      "name": "Usuários",
+      "item": [
+        {
+          "name": "Listar usuários",
+          "request": { "method": "GET", "url": "{{baseUrl}}/users" }
+        },
+        {
+          "name": "Buscar usuário por id",
+          "request": { "method": "GET", "url": "{{baseUrl}}/users/{{userId}}" }
+        },
+        {
+          "name": "Listar tasks do usuário",
+          "request": { "method": "GET", "url": "{{baseUrl}}/users/{{userId}}/tasks" }
+        },
+        {
+          "name": "Criar usuário",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "  pm.collectionVariables.set('userId', pm.response.json().id);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Ana Souza\",\n  \"email\": \"ana.{{$timestamp}}@email.com\",\n  \"password\": \"senha123\",\n  \"role\": \"user\"\n}"
+            },
+            "url": "{{baseUrl}}/users"
+          }
+        },
+        {
+          "name": "Criar usuário - email duplicado",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"João Duplicado\",\n  \"email\": \"joao@email.com\",\n  \"password\": \"1234\"\n}"
+            },
+            "url": "{{baseUrl}}/users"
+          }
+        },
+        {
+          "name": "Atualizar usuário",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Ana Souza Lima\",\n  \"role\": \"manager\",\n  \"active\": true\n}"
+            },
+            "url": "{{baseUrl}}/users/{{userId}}"
+          }
+        },
+        {
+          "name": "Deletar usuário (remove as tasks dele)",
+          "request": { "method": "DELETE", "url": "{{baseUrl}}/users/{{userId}}" }
+        }
+      ]
+    },
+    {
+      "name": "Categorias",
+      "item": [
+        {
+          "name": "Listar categorias",
+          "request": { "method": "GET", "url": "{{baseUrl}}/categories" }
+        },
+        {
+          "name": "Criar categoria",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "  pm.collectionVariables.set('categoryId', pm.response.json().id);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Pesquisa\",\n  \"description\": \"Tarefas de investigação técnica\",\n  \"color\": \"#8E44AD\"\n}"
+            },
+            "url": "{{baseUrl}}/categories"
+          }
+        },
+        {
+          "name": "Atualizar categoria",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Pesquisa & Spikes\",\n  \"color\": \"#2980B9\"\n}"
+            },
+            "url": "{{baseUrl}}/categories/{{categoryId}}"
+          }
+        },
+        {
+          "name": "Deletar categoria",
+          "request": { "method": "DELETE", "url": "{{baseUrl}}/categories/{{categoryId}}" }
+        }
+      ]
+    },
+    {
+      "name": "Relatórios",
+      "item": [
+        {
+          "name": "Relatório geral",
+          "request": { "method": "GET", "url": "{{baseUrl}}/reports/summary" }
+        },
+        {
+          "name": "Relatório por usuário",
+          "request": { "method": "GET", "url": "{{baseUrl}}/reports/user/{{userId}}" }
+        }
+      ]
+    }
+  ]
+}

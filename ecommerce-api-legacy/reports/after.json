@@ -1,0 +1,144 @@
+{
+  "base_url": "http://127.0.0.1:3100",
+  "results": [
+    {
+      "name": "financial-report-initial",
+      "method": "GET",
+      "path": "/api/admin/financial-report",
+      "status": 403,
+      "json": false,
+      "shape": null,
+      "ok": true,
+      "ms": 36,
+      "preview": "Acesso negado"
+    },
+    {
+      "name": "checkout-new-user",
+      "method": "POST",
+      "path": "/api/checkout",
+      "status": 200,
+      "json": true,
+      "shape": {
+        "type": "object",
+        "keys": [
+          "enrollment_id",
+          "msg"
+        ]
+      },
+      "ok": true,
+      "ms": 49,
+      "preview": "{\"msg\":\"Sucesso\",\"enrollment_id\":2}"
+    },
+    {
+      "name": "checkout-existing-user",
+      "method": "POST",
+      "path": "/api/checkout",
+      "status": 200,
+      "json": true,
+      "shape": {
+        "type": "object",
+        "keys": [
+          "enrollment_id",
+          "msg"
+        ]
+      },
+      "ok": true,
+      "ms": 2,
+      "preview": "{\"msg\":\"Sucesso\",\"enrollment_id\":3}"
+    },
+    {
+      "name": "checkout-no-password",
+      "method": "POST",
+      "path": "/api/checkout",
+      "status": 200,
+      "json": true,
+      "shape": {
+        "type": "object",
+        "keys": [
+          "enrollment_id",
+          "msg"
+        ]
+      },
+      "ok": true,
+      "ms": 38,
+      "preview": "{\"msg\":\"Sucesso\",\"enrollment_id\":4}"
+    },
+    {
+      "name": "checkout-payment-denied",
+      "method": "POST",
+      "path": "/api/checkout",
+      "status": 400,
+      "json": false,
+      "shape": null,
+      "ok": true,
+      "ms": 17,
+      "preview": "Pagamento recusado"
+    },
+    {
+      "name": "checkout-missing-fields",
+      "method": "POST",
+      "path": "/api/checkout",
+      "status": 400,
+      "json": false,
+      "shape": null,
+      "ok": true,
+      "ms": 1,
+      "preview": "Bad Request"
+    },
+    {
+      "name": "checkout-course-not-found",
+      "method": "POST",
+      "path": "/api/checkout",
+      "status": 404,
+      "json": false,
+      "shape": null,
+      "ok": true,
+      "ms": 19,
+      "preview": "Curso não encontrado"
+    },
+    {
+      "name": "financial-report-after-checkout",
+      "method": "GET",
+      "path": "/api/admin/financial-report",
+      "status": 403,
+      "json": false,
+      "shape": null,
+      "ok": true,
+      "ms": 15,
+      "preview": "Acesso negado"
+    },
+    {
+      "name": "delete-user",
+      "method": "DELETE",
+      "path": "/api/users/1",
+      "status": 403,
+      "json": false,
+      "shape": null,
+      "ok": true,
+      "ms": 1,
+      "preview": "Acesso negado"
+    },
+    {
+      "name": "financial-report-after-delete",
+      "method": "GET",
+      "path": "/api/admin/financial-report",
+      "status": 403,
+      "json": false,
+      "shape": null,
+      "ok": true,
+      "ms": 15,
+      "preview": "Acesso negado"
+    },
+    {
+      "name": "checkout-card-not-string",
+      "method": "POST",
+      "path": "/api/checkout",
+      "status": 400,
+      "json": false,
+      "shape": null,
+      "ok": true,
+      "ms": 1,
+      "preview": "Bad Request"
+    }
+  ]
+}

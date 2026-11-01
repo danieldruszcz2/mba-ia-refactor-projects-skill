@@ -1,0 +1,5 @@
+[
+  {"name": "admin-query-disabled", "method": "POST", "path": "/admin/query", "body": {"sql": "SELECT id FROM produtos"}, "expect_status": 403},
+  {"name": "admin-reset-db-disabled", "method": "POST", "path": "/admin/reset-db", "expect_status": 403},
+  {"name": "rota-inexistente", "method": "GET", "path": "/nao-existe", "expect_status": 404}
+]

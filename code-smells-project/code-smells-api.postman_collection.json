@@ -1,0 +1,261 @@
+{
+  "info": {
+    "name": "Code Smells Project - API Loja",
+    "description": "Collection para testar a API Flask do code-smells-project. Suba a API com `python app.py` antes (http://localhost:5000).",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:5000" },
+    { "key": "produtoId", "value": "1" },
+    { "key": "usuarioId", "value": "2" },
+    { "key": "pedidoId", "value": "1" }
+  ],
+  "item": [
+    {
+      "name": "Geral",
+      "item": [
+        {
+          "name": "Index",
+          "request": { "method": "GET", "url": "{{baseUrl}}/" }
+        },
+        {
+          "name": "Health check",
+          "request": { "method": "GET", "url": "{{baseUrl}}/health" }
+        }
+      ]
+    },
+    {
+      "name": "Produtos",
+      "item": [
+        {
+          "name": "Listar produtos",
+          "request": { "method": "GET", "url": "{{baseUrl}}/produtos" }
+        },
+        {
+          "name": "Buscar produtos (filtros)",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/produtos/busca?q=mouse&categoria=informatica&preco_min=10&preco_max=500",
+              "host": ["{{baseUrl}}"],
+              "path": ["produtos", "busca"],
+              "query": [
+                { "key": "q", "value": "mouse" },
+                { "key": "categoria", "value": "informatica" },
+                { "key": "preco_min", "value": "10" },
+                { "key": "preco_max", "value": "500" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Buscar produto por ID",
+          "request": { "method": "GET", "url": "{{baseUrl}}/produtos/{{produtoId}}" }
+        },
+        {
+          "name": "Buscar produto inexistente (404)",
+          "request": { "method": "GET", "url": "{{baseUrl}}/produtos/9999" }
+        },
+        {
+          "name": "Criar produto",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 201 ou 200', () => pm.expect(pm.response.code).to.be.oneOf([200, 201]));",
+                  "const body = pm.response.json();",
+                  "const id = body.dados && (body.dados.id || body.dados.produto_id);",
+                  "if (id) pm.collectionVariables.set('produtoId', id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{baseUrl}}/produtos",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nome\": \"Notebook\",\n  \"descricao\": \"Notebook i7 16GB\",\n  \"preco\": 4999.90,\n  \"estoque\": 5,\n  \"categoria\": \"informatica\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Criar produto inválido (sem campos obrigatórios)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{baseUrl}}/produtos",
+            "body": { "mode": "raw", "raw": "{\n  \"descricao\": \"sem nome, preco e estoque\"\n}" }
+          }
+        },
+        {
+          "name": "Atualizar produto",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{baseUrl}}/produtos/{{produtoId}}",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nome\": \"Notebook Atualizado\",\n  \"descricao\": \"Notebook i7 32GB\",\n  \"preco\": 5499.90,\n  \"estoque\": 3,\n  \"categoria\": \"informatica\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Deletar produto",
+          "request": { "method": "DELETE", "url": "{{baseUrl}}/produtos/{{produtoId}}" }
+        }
+      ]
+    },
+    {
+      "name": "Usuários",
+      "item": [
+        {
+          "name": "Listar usuários",
+          "request": { "method": "GET", "url": "{{baseUrl}}/usuarios" }
+        },
+        {
+          "name": "Buscar usuário por ID",
+          "request": { "method": "GET", "url": "{{baseUrl}}/usuarios/{{usuarioId}}" }
+        },
+        {
+          "name": "Criar usuário",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{baseUrl}}/usuarios",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nome\": \"Carlos Teste\",\n  \"email\": \"carlos{{$timestamp}}@email.com\",\n  \"senha\": \"senha123\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Login - admin",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{baseUrl}}/login",
+            "body": { "mode": "raw", "raw": "{\n  \"email\": \"admin@loja.com\",\n  \"senha\": \"admin123\"\n}" }
+          }
+        },
+        {
+          "name": "Login - cliente",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{baseUrl}}/login",
+            "body": { "mode": "raw", "raw": "{\n  \"email\": \"joao@email.com\",\n  \"senha\": \"123456\"\n}" }
+          }
+        },
+        {
+          "name": "Login - senha inválida",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{baseUrl}}/login",
+            "body": { "mode": "raw", "raw": "{\n  \"email\": \"admin@loja.com\",\n  \"senha\": \"errada\"\n}" }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Pedidos",
+      "item": [
+        {
+          "name": "Criar pedido",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 201 ou 200', () => pm.expect(pm.response.code).to.be.oneOf([200, 201]));",
+                  "const body = pm.response.json();",
+                  "if (body.dados && body.dados.pedido_id) pm.collectionVariables.set('pedidoId', body.dados.pedido_id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{baseUrl}}/pedidos",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"usuario_id\": {{usuarioId}},\n  \"itens\": [\n    { \"produto_id\": 2, \"quantidade\": 2 },\n    { \"produto_id\": 3, \"quantidade\": 1 }\n  ]\n}"
+            }
+          }
+        },
+        {
+          "name": "Criar pedido - estoque insuficiente",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{baseUrl}}/pedidos",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"usuario_id\": {{usuarioId}},\n  \"itens\": [\n    { \"produto_id\": 2, \"quantidade\": 99999 }\n  ]\n}"
+            }
+          }
+        },
+        {
+          "name": "Criar pedido - sem itens",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{baseUrl}}/pedidos",
+            "body": { "mode": "raw", "raw": "{\n  \"usuario_id\": {{usuarioId}},\n  \"itens\": []\n}" }
+          }
+        },
+        {
+          "name": "Listar todos os pedidos",
+          "request": { "method": "GET", "url": "{{baseUrl}}/pedidos" }
+        },
+        {
+          "name": "Listar pedidos do usuário",
+          "request": { "method": "GET", "url": "{{baseUrl}}/pedidos/usuario/{{usuarioId}}" }
+        },
+        {
+          "name": "Atualizar status do pedido",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{baseUrl}}/pedidos/{{pedidoId}}/status",
+            "body": { "mode": "raw", "raw": "{\n  \"status\": \"enviado\"\n}" }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Relatórios",
+      "item": [
+        {
+          "name": "Relatório de vendas",
+          "request": { "method": "GET", "url": "{{baseUrl}}/relatorios/vendas" }
+        }
+      ]
+    },
+    {
+      "name": "Admin (PERIGOSO)",
+      "description": "Endpoints inseguros de propósito (code smells do desafio). O reset-db apaga TODOS os dados.",
+      "item": [
+        {
+          "name": "Executar query SQL arbitrária",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{baseUrl}}/admin/query",
+            "body": { "mode": "raw", "raw": "{\n  \"sql\": \"SELECT id, nome, email, tipo FROM usuarios\"\n}" }
+          }
+        },
+        {
+          "name": "Resetar banco (apaga tudo!)",
+          "request": { "method": "POST", "url": "{{baseUrl}}/admin/reset-db" }
+        }
+      ]
+    }
+  ]
+}

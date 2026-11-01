@@ -1,0 +1,829 @@
+{
+  "base_url": "http://127.0.0.1:5000",
+  "results": [
+    {
+      "name": "index",
+      "method": "GET",
+      "path": "/",
+      "status": 200,
+      "json": true,
+      "shape": {
+        "type": "object",
+        "keys": [
+          "message",
+          "version"
+        ]
+      },
+      "ok": true,
+      "ms": 24,
+      "preview": "{\n  \"message\": \"Task Manager API\",\n  \"version\": \"1.0\"\n}\n"
+    },
+    {
+      "name": "health",
+      "method": "GET",
+      "path": "/health",
+      "status": 200,
+      "json": true,
+      "shape": {
+        "type": "object",
+        "keys": [
+          "status",
+          "timestamp"
+        ]
+      },
+      "ok": true,
+      "ms": 27,
+      "preview": "{\n  \"status\": \"ok\",\n  \"timestamp\": \"2026-11-01 17:44:19.262961\"\n}\n"
+    },
+    {
+      "name": "list-tasks",
+      "method": "GET",
+      "path": "/tasks",
+      "status": 200,
+      "json": true,
+      "shape": {
+        "type": "array",
+        "item_keys": [
+          "category_id",
+          "category_name",
+          "created_at",
+          "description",
+          "due_date",
+          "id",
+          "overdue",
+          "priority",
+          "status",
+          "tags",
+          "title",
+          "updated_at",
+          "user_id",
+          "user_name"
+        ]
+      },
+      "ok": true,
+      "ms": 31,
+      "preview": "[\n  {\n    \"category_id\": 1,\n    \"category_name\": \"Backend\",\n    \"created_at\": \"2026-11-01 20:43:52.573584\",\n    \"description\": \"Adicionar autentica\\u00e7\\u00e3o real com JWT\",\n    \"due_date\": \"2026-10-29 20:43:52.570700\",\n    \"id\": 1,\n    \"overdue\": true,\n    \"priority\": 1,\n    \"status\": \"pending\",\n"
+    },
+    {
+      "name": "get-task",
+      "method": "GET",
+      "path": "/tasks/1",
+      "status": 200,
+      "json": true,
+      "shape": {
+        "type": "object",
+        "keys": [
+          "category_id",
+          "created_at",
+          "description",
+          "due_date",
+          "id",
+          "overdue",
+          "priority",
+          "status",
+          "tags",
+          "title",
+          "updated_at",
+          "user_id"
+        ]
+      },
+      "ok": true,
+      "ms": 12,
+      "preview": "{\n  \"category_id\": 1,\n  \"created_at\": \"2026-11-01 20:43:52.573584\",\n  \"description\": \"Adicionar autentica\\u00e7\\u00e3o real com JWT\",\n  \"due_date\": \"2026-10-29 20:43:52.570700\",\n  \"id\": 1,\n  \"overdue\": true,\n  \"priority\": 1,\n  \"status\": \"pending\",\n  \"tags\": [],\n  \"title\": \"Implementar autentica\\u00e"
+    },
+    {
+      "name": "get-task-404",
+      "method": "GET",
+      "path": "/tasks/99999",
+      "status": 404,
+      "json": true,
+      "shape": {
+        "type": "object",
+        "keys": [
+          "error"
+        ]
+      },
+      "ok": true,
+      "ms": 17,
+      "preview": "{\n  \"error\": \"Task n\\u00e3o encontrada\"\n}\n"
+    },
+    {
+      "name": "search-tasks",
+      "method": "GET",
+      "path": "/tasks/search?q=a&status=pending&user_id=1",
+      "status": 200,
+      "json": true,
+      "shape": {
+        "type": "array",
+        "item_keys": [
+          "category_id",
+          "created_at",
+          "description",
+          "due_date",
+          "id",
+          "priority",
+          "status",
+          "tags",
+          "title",
+          "updated_at",
+          "user_id"
+        ]
+      },
+      "ok": true,
+      "ms": 17,
+      "preview": "[\n  {\n    \"category_id\": 1,\n    \"created_at\": \"2026-11-01 20:43:52.573584\",\n    \"description\": \"Adicionar autentica\\u00e7\\u00e3o real com JWT\",\n    \"due_date\": \"2026-10-29 20:43:52.570700\",\n    \"id\": 1,\n    \"priority\": 1,\n    \"status\": \"pending\",\n    \"tags\": [],\n    \"title\": \"Implementar autentica\\u"
+    },
+    {
+      "name": "search-tasks-priority",
+      "method": "GET",
+      "path": "/tasks/search?priority=1",
+      "status": 200,
+      "json": true,
+      "shape": {
+        "type": "array",
+        "item_keys": [
+          "category_id",
+          "created_at",
+          "description",
+          "due_date",
+          "id",
+          "priority",
+          "status",
+          "tags",
+          "title",
+          "updated_at",
+          "user_id"
+        ]
+      },
+      "ok": true,
+      "ms": 15,
+      "preview": "[\n  {\n    \"category_id\": 1,\n    \"created_at\": \"2026-11-01 20:43:52.573584\",\n    \"description\": \"Adicionar autentica\\u00e7\\u00e3o real com JWT\",\n    \"due_date\": \"2026-10-29 20:43:52.570700\",\n    \"id\": 1,\n    \"priority\": 1,\n    \"status\": \"pending\",\n    \"tags\": [],\n    \"title\": \"Implementar autentica\\u"
+    },
+    {
+      "name": "search-tasks-bad-priority",
+      "method": "GET",
+      "path": "/tasks/search?priority=abc",
+      "status": 500,
+      "json": false,
+      "shape": null,
+      "ok": false,
+      "ms": 27,
+      "preview": "<!doctype html>\n<html lang=en>\n  <head>\n    <title>ValueError: invalid literal for int() with base 10: &#39;abc&#39;\n // Werkzeug Debugger</title>\n    <link rel=\"stylesheet\" href=\"?__debugger__=yes&amp;cmd=resource&amp;f=style.css\">\n    <link rel=\"shortcut icon\"\n        href=\"?__debugger__=yes&amp;c"
+    },
+    {
+      "name": "task-stats",
+      "method": "GET",
+      "path": "/tasks/stats",
+      "status": 200,
+      "json": true,
+      "shape": {
+        "type": "object",
+        "keys": [
+          "cancelled",
+          "completion_rate",
+          "done",
+          "in_progress",
+          "overdue",
+          "pending",
+          "total"
+        ]
+      },
+      "ok": true,
+      "ms": 29,
+      "preview": "{\n  \"cancelled\": 1,\n  \"completion_rate\": 10.0,\n  \"done\": 1,\n  \"in_progress\": 2,\n  \"overdue\": 2,\n  \"pending\": 6,\n  \"total\": 10\n}\n"
+    },
+    {
+      "name": "list-users",
+      "method": "GET",
+      "path": "/users",
+      "status": 200,
+      "json": true,
+      "shape": {
+        "type": "array",
+        "item_keys": [
+          "active",
+          "created_at",
+          "email",
+          "id",
+          "name",
+          "role",
+          "task_count"
+        ]
+      },
+      "ok": true,
+      "ms": 13,
+      "preview": "[\n  {\n    \"active\": true,\n    \"created_at\": \"2026-11-01 20:43:52.552933\",\n    \"email\": \"joao@email.com\",\n    \"id\": 1,\n    \"name\": \"Jo\\u00e3o Silva\",\n    \"role\": \"admin\",\n    \"task_count\": 4\n  },\n  {\n    \"active\": true,\n    \"created_at\": \"2026-11-01 20:43:52.552937\",\n    \"email\": \"maria@email.com\",\n "
+    },
+    {
+      "name": "get-user",
+      "method": "GET",
+      "path": "/users/1",
+      "status": 200,
+      "json": true,
+      "shape": {
+        "type": "object",
+        "keys": [
+          "active",
+          "created_at",
+          "email",
+          "id",
+          "name",
+          "password",
+          "role",
+          "tasks"
+        ]
+      },
+      "ok": true,
+      "ms": 17,
+      "preview": "{\n  \"active\": true,\n  \"created_at\": \"2026-11-01 20:43:52.552933\",\n  \"email\": \"joao@email.com\",\n  \"id\": 1,\n  \"name\": \"Jo\\u00e3o Silva\",\n  \"password\": \"81dc9bdb52d04dc20036dbd8313ed055\",\n  \"role\": \"admin\",\n  \"tasks\": [\n    {\n      \"category_id\": 1,\n      \"created_at\": \"2026-11-01 20:43:52.573584\",\n   "
+    },
+    {
+      "name": "get-user-404",
+      "method": "GET",
+      "path": "/users/99999",
+      "status": 404,
+      "json": true,
+      "shape": {
+        "type": "object",
+        "keys": [
+          "error"
+        ]
+      },
+      "ok": true,
+      "ms": 15,
+      "preview": "{\n  \"error\": \"Usu\\u00e1rio n\\u00e3o encontrado\"\n}\n"
+    },
+    {
+      "name": "get-user-tasks",
+      "method": "GET",
+      "path": "/users/1/tasks",
+      "status": 200,
+      "json": true,
+      "shape": {
+        "type": "array",
+        "item_keys": [
+          "created_at",
+          "description",
+          "due_date",
+          "id",
+          "overdue",
+          "priority",
+          "status",
+          "title"
+        ]
+      },
+      "ok": true,
+      "ms": 2,
+      "preview": "[\n  {\n    \"created_at\": \"2026-11-01 20:43:52.573584\",\n    \"description\": \"Adicionar autentica\\u00e7\\u00e3o real com JWT\",\n    \"due_date\": \"2026-10-29 20:43:52.570700\",\n    \"id\": 1,\n    \"overdue\": true,\n    \"priority\": 1,\n    \"status\": \"pending\",\n    \"title\": \"Implementar autentica\\u00e7\\u00e3o JWT\"\n"
+    },
+    {
+      "name": "login-ok",
+      "method": "POST",
+      "path": "/login",
+      "status": 200,
+      "json": true,
+      "shape": {
+        "type": "object",
+        "keys": [
+          "message",
+          "token",
+          "user"
+        ]
+      },
+      "ok": true,
+      "ms": 15,
+      "preview": "{\n  \"message\": \"Login realizado com sucesso\",\n  \"token\": \"fake-jwt-token-1\",\n  \"user\": {\n    \"active\": true,\n    \"created_at\": \"2026-11-01 20:43:52.552933\",\n    \"email\": \"joao@email.com\",\n    \"id\": 1,\n    \"name\": \"Jo\\u00e3o Silva\",\n    \"password\": \"81dc9bdb52d04dc20036dbd8313ed055\",\n    \"role\": \"adm"
+    },
+    {
+      "name": "login-ok-again",
+      "method": "POST",
+      "path": "/login",
+      "status": 200,
+      "json": true,
+      "shape": {
+        "type": "object",
+        "keys": [
+          "message",
+          "token",
+          "user"
+        ]
+      },
+      "ok": true,
+      "ms": 15,
+      "preview": "{\n  \"message\": \"Login realizado com sucesso\",\n  \"token\": \"fake-jwt-token-1\",\n  \"user\": {\n    \"active\": true,\n    \"created_at\": \"2026-11-01 20:43:52.552933\",\n    \"email\": \"joao@email.com\",\n    \"id\": 1,\n    \"name\": \"Jo\\u00e3o Silva\",\n    \"password\": \"81dc9bdb52d04dc20036dbd8313ed055\",\n    \"role\": \"adm"
+    },
+    {
+      "name": "login-bad-password",
+      "method": "POST",
+      "path": "/login",
+      "status": 401,
+      "json": true,
+      "shape": {
+        "type": "object",
+        "keys": [
+          "error"
+        ]
+      },
+      "ok": true,
+      "ms": 2,
+      "preview": "{\n  \"error\": \"Credenciais inv\\u00e1lidas\"\n}\n"
+    },
+    {
+      "name": "login-missing-fields",
+      "method": "POST",
+      "path": "/login",
+      "status": 400,
+      "json": true,
+      "shape": {
+        "type": "object",
+        "keys": [
+          "error"
+        ]
+      },
+      "ok": true,
+      "ms": 16,
+      "preview": "{\n  \"error\": \"Email e senha s\\u00e3o obrigat\\u00f3rios\"\n}\n"
+    },
+    {
+      "name": "list-categories",
+      "method": "GET",
+      "path": "/categories",
+      "status": 200,
+      "json": true,
+      "shape": {
+        "type": "array",
+        "item_keys": [
+          "color",
+          "created_at",
+          "description",
+          "id",
+          "name",
+          "task_count"
+        ]
+      },
+      "ok": true,
+      "ms": 19,
+      "preview": "[\n  {\n    \"color\": \"#3498db\",\n    \"created_at\": \"2026-11-01 20:43:52.561223\",\n    \"description\": \"Tarefas de backend\",\n    \"id\": 1,\n    \"name\": \"Backend\",\n    \"task_count\": 6\n  },\n  {\n    \"color\": \"#2ecc71\",\n    \"created_at\": \"2026-11-01 20:43:52.561226\",\n    \"description\": \"Tarefas de frontend\",\n  "
+    },
+    {
+      "name": "reports-summary",
+      "method": "GET",
+      "path": "/reports/summary",
+      "status": 200,
+      "json": true,
+      "shape": {
+        "type": "object",
+        "keys": [
+          "generated_at",
+          "overdue",
+          "overview",
+          "recent_activity",
+          "tasks_by_priority",
+          "tasks_by_status",
+          "user_productivity"
+        ]
+      },
+      "ok": true,
+      "ms": 23,
+      "preview": "{\n  \"generated_at\": \"2026-11-01 20:44:19.549504\",\n  \"overdue\": {\n    \"count\": 2,\n    \"tasks\": [\n      {\n        \"days_overdue\": 3,\n        \"due_date\": \"2026-10-29 20:43:52.570700\",\n        \"id\": 1,\n        \"title\": \"Implementar autentica\\u00e7\\u00e3o JWT\"\n      },\n      {\n        \"days_overdue\": 1,\n"
+    },
+    {
+      "name": "reports-user",
+      "method": "GET",
+      "path": "/reports/user/1",
+      "status": 200,
+      "json": true,
+      "shape": {
+        "type": "object",
+        "keys": [
+          "statistics",
+          "user"
+        ]
+      },
+      "ok": true,
+      "ms": 7,
+      "preview": "{\n  \"statistics\": {\n    \"cancelled\": 0,\n    \"completion_rate\": 0.0,\n    \"done\": 0,\n    \"high_priority\": 2,\n    \"in_progress\": 0,\n    \"overdue\": 2,\n    \"pending\": 4,\n    \"total_tasks\": 4\n  },\n  \"user\": {\n    \"email\": \"joao@email.com\",\n    \"id\": 1,\n    \"name\": \"Jo\\u00e3o Silva\"\n  }\n}\n"
+    },
+    {
+      "name": "reports-user-404",
+      "method": "GET",
+      "path": "/reports/user/99999",
+      "status": 404,
+      "json": true,
+      "shape": {
+        "type": "object",
+        "keys": [
+          "error"
+        ]
+      },
+      "ok": true,
+      "ms": 15,
+      "preview": "{\n  \"error\": \"Usu\\u00e1rio n\\u00e3o encontrado\"\n}\n"
+    },
+    {
+      "name": "create-task",
+      "method": "POST",
+      "path": "/tasks",
+      "status": 201,
+      "json": true,
+      "shape": {
+        "type": "object",
+        "keys": [
+          "category_id",
+          "created_at",
+          "description",
+          "due_date",
+          "id",
+          "priority",
+          "status",
+          "tags",
+          "title",
+          "updated_at",
+          "user_id"
+        ]
+      },
+      "ok": true,
+      "ms": 33,
+      "preview": "{\n  \"category_id\": 1,\n  \"created_at\": \"2026-11-01 20:44:19.596560\",\n  \"description\": \"Cobrir os endpoints de tasks\",\n  \"due_date\": \"2026-12-31 00:00:00\",\n  \"id\": 11,\n  \"priority\": 2,\n  \"status\": \"pending\",\n  \"tags\": [\n    \"testes\",\n    \"backend\"\n  ],\n  \"title\": \"Escrever testes de integra\\u00e7\\u00e"
+    },
+    {
+      "name": "create-task-short-title",
+      "method": "POST",
+      "path": "/tasks",
+      "status": 400,
+      "json": true,
+      "shape": {
+        "type": "object",
+        "keys": [
+          "error"
+        ]
+      },
+      "ok": true,
+      "ms": 17,
+      "preview": "{\n  \"error\": \"T\\u00edtulo muito curto\"\n}\n"
+    },
+    {
+      "name": "create-task-bad-priority",
+      "method": "POST",
+      "path": "/tasks",
+      "status": 500,
+      "json": false,
+      "shape": null,
+      "ok": false,
+      "ms": 6,
+      "preview": "<!doctype html>\n<html lang=en>\n  <head>\n    <title>TypeError: &#39;&lt;&#39; not supported between instances of &#39;str&#39; and &#39;int&#39;\n // Werkzeug Debugger</title>\n    <link rel=\"stylesheet\" href=\"?__debugger__=yes&amp;cmd=resource&amp;f=style.css\">\n    <link rel=\"shortcut icon\"\n        hr"
+    },
+    {
+      "name": "create-task-list-body",
+      "method": "POST",
+      "path": "/tasks",
+      "status": 500,
+      "json": false,
+      "shape": null,
+      "ok": false,
+      "ms": 5,
+      "preview": "<!doctype html>\n<html lang=en>\n  <head>\n    <title>AttributeError: &#39;list&#39; object has no attribute &#39;get&#39;\n // Werkzeug Debugger</title>\n    <link rel=\"stylesheet\" href=\"?__debugger__=yes&amp;cmd=resource&amp;f=style.css\">\n    <link rel=\"shortcut icon\"\n        href=\"?__debugger__=yes&am"
+    },
+    {
+      "name": "create-task-user-404",
+      "method": "POST",
+      "path": "/tasks",
+      "status": 404,
+      "json": true,
+      "shape": {
+        "type": "object",
+        "keys": [
+          "error"
+        ]
+      },
+      "ok": true,
+      "ms": 2,
+      "preview": "{\n  \"error\": \"Usu\\u00e1rio n\\u00e3o encontrado\"\n}\n"
+    },
+    {
+      "name": "get-created-task",
+      "method": "GET",
+      "path": "/tasks/11",
+      "status": 200,
+      "json": true,
+      "shape": {
+        "type": "object",
+        "keys": [
+          "category_id",
+          "created_at",
+          "description",
+          "due_date",
+          "id",
+          "overdue",
+          "priority",
+          "status",
+          "tags",
+          "title",
+          "updated_at",
+          "user_id"
+        ]
+      },
+      "ok": true,
+      "ms": 3,
+      "preview": "{\n  \"category_id\": 1,\n  \"created_at\": \"2026-11-01 20:44:19.596560\",\n  \"description\": \"Cobrir os endpoints de tasks\",\n  \"due_date\": \"2026-12-31 00:00:00\",\n  \"id\": 11,\n  \"overdue\": false,\n  \"priority\": 2,\n  \"status\": \"pending\",\n  \"tags\": [\n    \"testes\",\n    \"backend\"\n  ],\n  \"title\": \"Escrever testes d"
+    },
+    {
+      "name": "update-task",
+      "method": "PUT",
+      "path": "/tasks/11",
+      "status": 200,
+      "json": true,
+      "shape": {
+        "type": "object",
+        "keys": [
+          "category_id",
+          "created_at",
+          "description",
+          "due_date",
+          "id",
+          "priority",
+          "status",
+          "tags",
+          "title",
+          "updated_at",
+          "user_id"
+        ]
+      },
+      "ok": true,
+      "ms": 10,
+      "preview": "{\n  \"category_id\": 1,\n  \"created_at\": \"2026-11-01 20:44:19.596560\",\n  \"description\": \"Cobrir os endpoints de tasks\",\n  \"due_date\": \"2026-11-30 00:00:00\",\n  \"id\": 11,\n  \"priority\": 1,\n  \"status\": \"in_progress\",\n  \"tags\": [\n    \"testes\",\n    \"urgente\"\n  ],\n  \"title\": \"Escrever testes de integra\\u00e7\\"
+    },
+    {
+      "name": "update-task-null-title",
+      "method": "PUT",
+      "path": "/tasks/11",
+      "status": 500,
+      "json": false,
+      "shape": null,
+      "ok": false,
+      "ms": 6,
+      "preview": "<!doctype html>\n<html lang=en>\n  <head>\n    <title>TypeError: object of type &#39;NoneType&#39; has no len()\n // Werkzeug Debugger</title>\n    <link rel=\"stylesheet\" href=\"?__debugger__=yes&amp;cmd=resource&amp;f=style.css\">\n    <link rel=\"shortcut icon\"\n        href=\"?__debugger__=yes&amp;cmd=resou"
+    },
+    {
+      "name": "delete-task",
+      "method": "DELETE",
+      "path": "/tasks/11",
+      "status": 200,
+      "json": true,
+      "shape": {
+        "type": "object",
+        "keys": [
+          "message"
+        ]
+      },
+      "ok": true,
+      "ms": 9,
+      "preview": "{\n  \"message\": \"Task deletada com sucesso\"\n}\n"
+    },
+    {
+      "name": "delete-task-404",
+      "method": "DELETE",
+      "path": "/tasks/99999",
+      "status": 404,
+      "json": true,
+      "shape": {
+        "type": "object",
+        "keys": [
+          "error"
+        ]
+      },
+      "ok": true,
+      "ms": 9,
+      "preview": "{\n  \"error\": \"Task n\\u00e3o encontrada\"\n}\n"
+    },
+    {
+      "name": "create-user",
+      "method": "POST",
+      "path": "/users",
+      "status": 201,
+      "json": true,
+      "shape": {
+        "type": "object",
+        "keys": [
+          "active",
+          "created_at",
+          "email",
+          "id",
+          "name",
+          "password",
+          "role"
+        ]
+      },
+      "ok": true,
+      "ms": 31,
+      "preview": "{\n  \"active\": true,\n  \"created_at\": \"2026-11-01 20:44:19.694887\",\n  \"email\": \"ana.smoke@email.com\",\n  \"id\": 4,\n  \"name\": \"Ana Souza\",\n  \"password\": \"e7d80ffeefa212b7c5c55700e4f7193e\",\n  \"role\": \"user\"\n}\n"
+    },
+    {
+      "name": "create-user-duplicate",
+      "method": "POST",
+      "path": "/users",
+      "status": 409,
+      "json": true,
+      "shape": {
+        "type": "object",
+        "keys": [
+          "error"
+        ]
+      },
+      "ok": true,
+      "ms": 21,
+      "preview": "{\n  \"error\": \"Email j\\u00e1 cadastrado\"\n}\n"
+    },
+    {
+      "name": "create-user-admin",
+      "method": "POST",
+      "path": "/users",
+      "status": 201,
+      "json": true,
+      "shape": {
+        "type": "object",
+        "keys": [
+          "active",
+          "created_at",
+          "email",
+          "id",
+          "name",
+          "password",
+          "role"
+        ]
+      },
+      "ok": true,
+      "ms": 23,
+      "preview": "{\n  \"active\": true,\n  \"created_at\": \"2026-11-01 20:44:19.740360\",\n  \"email\": \"admin.smoke@email.com\",\n  \"id\": 5,\n  \"name\": \"Admin Smoke\",\n  \"password\": \"e7d80ffeefa212b7c5c55700e4f7193e\",\n  \"role\": \"admin\"\n}\n"
+    },
+    {
+      "name": "update-user",
+      "method": "PUT",
+      "path": "/users/4",
+      "status": 200,
+      "json": true,
+      "shape": {
+        "type": "object",
+        "keys": [
+          "active",
+          "created_at",
+          "email",
+          "id",
+          "name",
+          "password",
+          "role"
+        ]
+      },
+      "ok": true,
+      "ms": 16,
+      "preview": "{\n  \"active\": true,\n  \"created_at\": \"2026-11-01 20:44:19.694887\",\n  \"email\": \"ana.smoke@email.com\",\n  \"id\": 4,\n  \"name\": \"Ana Souza Lima\",\n  \"password\": \"e7d80ffeefa212b7c5c55700e4f7193e\",\n  \"role\": \"manager\"\n}\n"
+    },
+    {
+      "name": "login-created-user",
+      "method": "POST",
+      "path": "/login",
+      "status": 200,
+      "json": true,
+      "shape": {
+        "type": "object",
+        "keys": [
+          "message",
+          "token",
+          "user"
+        ]
+      },
+      "ok": true,
+      "ms": 2,
+      "preview": "{\n  \"message\": \"Login realizado com sucesso\",\n  \"token\": \"fake-jwt-token-4\",\n  \"user\": {\n    \"active\": true,\n    \"created_at\": \"2026-11-01 20:44:19.694887\",\n    \"email\": \"ana.smoke@email.com\",\n    \"id\": 4,\n    \"name\": \"Ana Souza Lima\",\n    \"password\": \"e7d80ffeefa212b7c5c55700e4f7193e\",\n    \"role\": "
+    },
+    {
+      "name": "get-created-user-tasks",
+      "method": "GET",
+      "path": "/users/4/tasks",
+      "status": 200,
+      "json": true,
+      "shape": {
+        "type": "array",
+        "item_keys": null
+      },
+      "ok": true,
+      "ms": 2,
+      "preview": "[]\n"
+    },
+    {
+      "name": "delete-user",
+      "method": "DELETE",
+      "path": "/users/4",
+      "status": 200,
+      "json": true,
+      "shape": {
+        "type": "object",
+        "keys": [
+          "message"
+        ]
+      },
+      "ok": true,
+      "ms": 9,
+      "preview": "{\n  \"message\": \"Usu\\u00e1rio deletado com sucesso\"\n}\n"
+    },
+    {
+      "name": "create-category",
+      "method": "POST",
+      "path": "/categories",
+      "status": 201,
+      "json": true,
+      "shape": {
+        "type": "object",
+        "keys": [
+          "color",
+          "created_at",
+          "description",
+          "id",
+          "name"
+        ]
+      },
+      "ok": true,
+      "ms": 35,
+      "preview": "{\n  \"color\": \"#8E44AD\",\n  \"created_at\": \"2026-11-01 20:44:19.804126\",\n  \"description\": \"Tarefas de investiga\\u00e7\\u00e3o t\\u00e9cnica\",\n  \"id\": 5,\n  \"name\": \"Pesquisa\"\n}\n"
+    },
+    {
+      "name": "create-category-no-name",
+      "method": "POST",
+      "path": "/categories",
+      "status": 400,
+      "json": true,
+      "shape": {
+        "type": "object",
+        "keys": [
+          "error"
+        ]
+      },
+      "ok": true,
+      "ms": 14,
+      "preview": "{\n  \"error\": \"Nome \\u00e9 obrigat\\u00f3rio\"\n}\n"
+    },
+    {
+      "name": "update-category",
+      "method": "PUT",
+      "path": "/categories/5",
+      "status": 200,
+      "json": true,
+      "shape": {
+        "type": "object",
+        "keys": [
+          "color",
+          "created_at",
+          "description",
+          "id",
+          "name"
+        ]
+      },
+      "ok": true,
+      "ms": 22,
+      "preview": "{\n  \"color\": \"#2980B9\",\n  \"created_at\": \"2026-11-01 20:44:19.804126\",\n  \"description\": \"Tarefas de investiga\\u00e7\\u00e3o t\\u00e9cnica\",\n  \"id\": 5,\n  \"name\": \"Pesquisa & Spikes\"\n}\n"
+    },
+    {
+      "name": "update-category-invalid-body",
+      "method": "PUT",
+      "path": "/categories/5",
+      "status": 500,
+      "json": false,
+      "shape": null,
+      "ok": false,
+      "ms": 29,
+      "preview": "<!doctype html>\n<html lang=en>\n  <head>\n    <title>TypeError: argument of type &#39;int&#39; is not a container or iterable\n // Werkzeug Debugger</title>\n    <link rel=\"stylesheet\" href=\"?__debugger__=yes&amp;cmd=resource&amp;f=style.css\">\n    <link rel=\"shortcut icon\"\n        href=\"?__debugger__=ye"
+    },
+    {
+      "name": "delete-category",
+      "method": "DELETE",
+      "path": "/categories/5",
+      "status": 200,
+      "json": true,
+      "shape": {
+        "type": "object",
+        "keys": [
+          "message"
+        ]
+      },
+      "ok": true,
+      "ms": 22,
+      "preview": "{\n  \"message\": \"Categoria deletada\"\n}\n"
+    },
+    {
+      "name": "delete-category-404",
+      "method": "DELETE",
+      "path": "/categories/99999",
+      "status": 404,
+      "json": true,
+      "shape": {
+        "type": "object",
+        "keys": [
+          "error"
+        ]
+      },
+      "ok": true,
+      "ms": 7,
+      "preview": "{\n  \"error\": \"Categoria n\\u00e3o encontrada\"\n}\n"
+    }
+  ]
+}

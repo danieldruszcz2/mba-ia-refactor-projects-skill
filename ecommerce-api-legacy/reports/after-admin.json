@@ -1,0 +1,165 @@
+{
+  "base_url": "http://127.0.0.1:3100",
+  "results": [
+    {
+      "name": "financial-report-initial",
+      "method": "GET",
+      "path": "/api/admin/financial-report",
+      "status": 200,
+      "json": true,
+      "shape": {
+        "type": "array",
+        "item_keys": [
+          "course",
+          "revenue",
+          "students"
+        ]
+      },
+      "ok": true,
+      "ms": 26,
+      "preview": "[{\"course\":\"Clean Architecture\",\"revenue\":997,\"students\":[{\"student\":\"Leonan\",\"paid\":997}]},{\"course\":\"Docker\",\"revenue\":0,\"students\":[]}]"
+    },
+    {
+      "name": "checkout-new-user",
+      "method": "POST",
+      "path": "/api/checkout",
+      "status": 200,
+      "json": true,
+      "shape": {
+        "type": "object",
+        "keys": [
+          "enrollment_id",
+          "msg"
+        ]
+      },
+      "ok": true,
+      "ms": 55,
+      "preview": "{\"msg\":\"Sucesso\",\"enrollment_id\":2}"
+    },
+    {
+      "name": "checkout-existing-user",
+      "method": "POST",
+      "path": "/api/checkout",
+      "status": 200,
+      "json": true,
+      "shape": {
+        "type": "object",
+        "keys": [
+          "enrollment_id",
+          "msg"
+        ]
+      },
+      "ok": true,
+      "ms": 13,
+      "preview": "{\"msg\":\"Sucesso\",\"enrollment_id\":3}"
+    },
+    {
+      "name": "checkout-no-password",
+      "method": "POST",
+      "path": "/api/checkout",
+      "status": 200,
+      "json": true,
+      "shape": {
+        "type": "object",
+        "keys": [
+          "enrollment_id",
+          "msg"
+        ]
+      },
+      "ok": true,
+      "ms": 49,
+      "preview": "{\"msg\":\"Sucesso\",\"enrollment_id\":4}"
+    },
+    {
+      "name": "checkout-payment-denied",
+      "method": "POST",
+      "path": "/api/checkout",
+      "status": 400,
+      "json": false,
+      "shape": null,
+      "ok": true,
+      "ms": 2,
+      "preview": "Pagamento recusado"
+    },
+    {
+      "name": "checkout-missing-fields",
+      "method": "POST",
+      "path": "/api/checkout",
+      "status": 400,
+      "json": false,
+      "shape": null,
+      "ok": true,
+      "ms": 16,
+      "preview": "Bad Request"
+    },
+    {
+      "name": "checkout-course-not-found",
+      "method": "POST",
+      "path": "/api/checkout",
+      "status": 404,
+      "json": false,
+      "shape": null,
+      "ok": true,
+      "ms": 1,
+      "preview": "Curso não encontrado"
+    },
+    {
+      "name": "financial-report-after-checkout",
+      "method": "GET",
+      "path": "/api/admin/financial-report",
+      "status": 200,
+      "json": true,
+      "shape": {
+        "type": "array",
+        "item_keys": [
+          "course",
+          "revenue",
+          "students"
+        ]
+      },
+      "ok": true,
+      "ms": 14,
+      "preview": "[{\"course\":\"Clean Architecture\",\"revenue\":1994,\"students\":[{\"student\":\"Leonan\",\"paid\":997},{\"student\":\"Sem Senha\",\"paid\":997}]},{\"course\":\"Docker\",\"revenue\":994,\"students\":[{\"student\":\"Guilherme\",\"paid\":497},{\"student\":\"Leonan\",\"paid\":497}]}]"
+    },
+    {
+      "name": "delete-user",
+      "method": "DELETE",
+      "path": "/api/users/1",
+      "status": 200,
+      "json": false,
+      "shape": null,
+      "ok": true,
+      "ms": 1,
+      "preview": "Usuário deletado."
+    },
+    {
+      "name": "financial-report-after-delete",
+      "method": "GET",
+      "path": "/api/admin/financial-report",
+      "status": 200,
+      "json": true,
+      "shape": {
+        "type": "array",
+        "item_keys": [
+          "course",
+          "revenue",
+          "students"
+        ]
+      },
+      "ok": true,
+      "ms": 16,
+      "preview": "[{\"course\":\"Clean Architecture\",\"revenue\":997,\"students\":[{\"student\":\"Sem Senha\",\"paid\":997}]},{\"course\":\"Docker\",\"revenue\":497,\"students\":[{\"student\":\"Guilherme\",\"paid\":497}]}]"
+    },
+    {
+      "name": "checkout-card-not-string",
+      "method": "POST",
+      "path": "/api/checkout",
+      "status": 400,
+      "json": false,
+      "shape": null,
+      "ok": true,
+      "ms": 16,
+      "preview": "Bad Request"
+    }
+  ]
+}
