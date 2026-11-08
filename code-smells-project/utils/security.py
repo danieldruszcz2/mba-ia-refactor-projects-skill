@@ -1,20 +1,26 @@
-"""Hash e verificação de senhas (scrypt com salt, via Werkzeug)."""
-import re
+"""Hash e verificação de senhas."""
+import hmac
 
 from werkzeug.security import check_password_hash, generate_password_hash
 
-_FORMATO_HASH = re.compile(r"^(scrypt|pbkdf2)(:[^$]*)?\$[^$]+\$[0-9a-f]+$")
+_HASH_PREFIXES = ("scrypt:", "pbkdf2:")
 
 
-def hash_senha(senha):
-    return generate_password_hash(senha)
+def hash_password(raw):
+    return generate_password_hash(raw)
 
 
-def verificar_senha(senha, senha_hash):
-    if not senha_hash or not e_hash_de_senha(senha_hash):
-        return False
-    return check_password_hash(senha_hash, senha)
+def is_hashed(stored):
+    return isinstance(stored, str) and stored.startswith(_HASH_PREFIXES)
 
 
-def e_hash_de_senha(valor):
-    return bool(valor) and bool(_FORMATO_HASH.match(valor))
+def verify_password(raw, stored):
+    """Retorna (senha_confere, precisa_rehash).
+
+    Senhas legadas gravadas em texto puro continuam aceitas e são sinalizadas para rehash.
+    """
+    if not stored:
+        return False, False
+    if is_hashed(stored):
+        return check_password_hash(stored, raw), False
+    return hmac.compare_digest(raw.encode("utf-8"), stored.encode("utf-8")), True

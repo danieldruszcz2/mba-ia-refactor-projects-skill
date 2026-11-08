@@ -1,5 +1,5 @@
 {
-  "base_url": "http://127.0.0.1:3100",
+  "base_url": "http://127.0.0.1:3000",
   "results": [
     {
       "name": "financial-report-initial",
@@ -16,7 +16,7 @@
         ]
       },
       "ok": true,
-      "ms": 26,
+      "ms": 32,
       "preview": "[{\"course\":\"Docker\",\"revenue\":0,\"students\":[]},{\"course\":\"Clean Architecture\",\"revenue\":997,\"students\":[{\"student\":\"Leonan\",\"paid\":997}]}]"
     },
     {
@@ -33,7 +33,7 @@
         ]
       },
       "ok": true,
-      "ms": 36,
+      "ms": 30,
       "preview": "{\"msg\":\"Sucesso\",\"enrollment_id\":2}"
     },
     {
@@ -50,7 +50,7 @@
         ]
       },
       "ok": true,
-      "ms": 15,
+      "ms": 4,
       "preview": "{\"msg\":\"Sucesso\",\"enrollment_id\":3}"
     },
     {
@@ -67,7 +67,7 @@
         ]
       },
       "ok": true,
-      "ms": 18,
+      "ms": 11,
       "preview": "{\"msg\":\"Sucesso\",\"enrollment_id\":4}"
     },
     {
@@ -78,7 +78,7 @@
       "json": false,
       "shape": null,
       "ok": true,
-      "ms": 30,
+      "ms": 5,
       "preview": "Pagamento recusado"
     },
     {
@@ -89,7 +89,7 @@
       "json": false,
       "shape": null,
       "ok": true,
-      "ms": 12,
+      "ms": 2,
       "preview": "Bad Request"
     },
     {
@@ -100,7 +100,7 @@
       "json": false,
       "shape": null,
       "ok": true,
-      "ms": 1,
+      "ms": 2,
       "preview": "Curso não encontrado"
     },
     {
@@ -118,18 +118,18 @@
         ]
       },
       "ok": true,
-      "ms": 1,
-      "preview": "[{\"course\":\"Clean Architecture\",\"revenue\":1994,\"students\":[{\"student\":\"Leonan\",\"paid\":997},{\"student\":\"Sem Senha\",\"paid\":997}]},{\"course\":\"Docker\",\"revenue\":994,\"students\":[{\"student\":\"Guilherme\",\"paid\":497},{\"student\":\"Leonan\",\"paid\":497}]}]"
+      "ms": 3,
+      "preview": "[{\"course\":\"Clean Architecture\",\"revenue\":1994,\"students\":[{\"student\":\"Leonan\",\"paid\":997},{\"student\":\"Maria\",\"paid\":997}]},{\"course\":\"Docker\",\"revenue\":994,\"students\":[{\"student\":\"Leonan\",\"paid\":497},{\"student\":\"Guilherme\",\"paid\":497}]}]"
     },
     {
       "name": "delete-user",
       "method": "DELETE",
-      "path": "/api/users/1",
+      "path": "/api/users/2",
       "status": 200,
       "json": false,
       "shape": null,
       "ok": true,
-      "ms": 1,
+      "ms": 16,
       "preview": "Usuário deletado, mas as matrículas e pagamentos ficaram sujos no banco."
     },
     {
@@ -147,8 +147,8 @@
         ]
       },
       "ok": true,
-      "ms": 13,
-      "preview": "[{\"course\":\"Clean Architecture\",\"revenue\":1994,\"students\":[{\"student\":\"Sem Senha\",\"paid\":997},{\"student\":\"Unknown\",\"paid\":997}]},{\"course\":\"Docker\",\"revenue\":994,\"students\":[{\"student\":\"Unknown\",\"paid\":497},{\"student\":\"Guilherme\",\"paid\":497}]}]"
+      "ms": 2,
+      "preview": "[{\"course\":\"Clean Architecture\",\"revenue\":1994,\"students\":[{\"student\":\"Leonan\",\"paid\":997},{\"student\":\"Maria\",\"paid\":997}]},{\"course\":\"Docker\",\"revenue\":994,\"students\":[{\"student\":\"Unknown\",\"paid\":497},{\"student\":\"Leonan\",\"paid\":497}]}]"
     },
     {
       "name": "checkout-card-not-string",

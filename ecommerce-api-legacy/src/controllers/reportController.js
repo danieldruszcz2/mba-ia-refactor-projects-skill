@@ -1,5 +1,3 @@
-'use strict';
-
 function createReportController({ reportService }) {
     return {
         async financialReport(req, res) {

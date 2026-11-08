@@ -1,41 +1,30 @@
-'use strict';
-
 const { PAYMENT_STATUS } = require('../config/constants');
-const { NotFoundError, ValidationError } = require('../utils/errors');
+const { NotFoundError, PaymentDeniedError } = require('../utils/errors');
 const { hashPassword, generateRandomPassword } = require('../utils/password');
 
-function createCheckoutService({
-    transaction, userRepository, courseRepository, enrollmentRepository,
-    paymentRepository, auditLogRepository, paymentGateway, logger,
-}) {
+function createCheckoutService({ db, users, courses, enrollments, payments, auditLogs, paymentGateway }) {
     return {
-        // Matricula o aluno num curso após aprovar o pagamento. Todas as escritas são atômicas.
-        async checkout({ userName, email, password, courseId, cardNumber }) {
-            const course = await courseRepository.findActiveById(courseId);
+        async checkout({ name, email, password, courseId, cardNumber }) {
+            const course = await courses.findActiveById(courseId);
             if (!course) throw new NotFoundError('Curso não encontrado');
 
-            const existingUser = await userRepository.findByEmail(email);
+            const existingUser = await users.findIdByEmail(email);
 
-            const status = paymentGateway.charge({ cardNumber, amount: course.price });
-            if (status === PAYMENT_STATUS.DENIED) throw new ValidationError('Pagamento recusado');
+            const status = await paymentGateway.charge({ cardNumber, amount: course.price });
+            if (status !== PAYMENT_STATUS.PAID) throw new PaymentDeniedError();
 
-            // Hash lento calculado fora da transação para não segurar o banco.
-            const passwordHash = existingUser
-                ? null
-                : await hashPassword(password || generateRandomPassword());
+            const passwordHash = existingUser ? null : await hashPassword(password || generateRandomPassword());
 
-            const { userId, enrollmentId } = await transaction(async () => {
-                const id = existingUser
+            // Usuário, matrícula, pagamento e auditoria são gravados juntos ou nada é gravado.
+            return db.transaction(async (tx) => {
+                const userId = existingUser
                     ? existingUser.id
-                    : await userRepository.create({ name: userName, email, passwordHash });
-                const newEnrollmentId = await enrollmentRepository.create({ userId: id, courseId });
-                await paymentRepository.create({ enrollmentId: newEnrollmentId, amount: course.price, status });
-                await auditLogRepository.record(`Checkout curso ${courseId} por ${id}`);
-                return { userId: id, enrollmentId: newEnrollmentId };
+                    : await users.create({ name, email, passwordHash }, tx);
+                const enrollmentId = await enrollments.create({ userId, courseId: course.id }, tx);
+                await payments.create({ enrollmentId, amount: course.price, status }, tx);
+                await auditLogs.record(`Checkout curso ${course.id} por ${userId}`, tx);
+                return { enrollmentId };
             });
-
-            logger.info(`Checkout concluído: usuário ${userId}, curso "${course.title}"`);
-            return { enrollmentId };
         },
     };
 }

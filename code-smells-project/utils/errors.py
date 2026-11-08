@@ -2,25 +2,25 @@
 
 
 class AppError(Exception):
-    status_code = 500
+    status = 500
 
-    def __init__(self, mensagem, extra=None):
-        super().__init__(mensagem)
-        self.mensagem = mensagem
+    def __init__(self, message, extra=None):
+        super().__init__(message)
+        self.message = message
         self.extra = extra or {}
 
 
 class ValidationError(AppError):
-    status_code = 400
+    status = 400
 
 
 class UnauthorizedError(AppError):
-    status_code = 401
+    status = 401
 
 
 class ForbiddenError(AppError):
-    status_code = 403
+    status = 403
 
 
 class NotFoundError(AppError):
-    status_code = 404
+    status = 404

@@ -1,23 +1,25 @@
-'use strict';
-
-class AppError extends Error {
-    constructor(message, status) {
+class HttpError extends Error {
+    constructor(status, message) {
         super(message);
         this.name = this.constructor.name;
         this.status = status;
     }
 }
 
-class ValidationError extends AppError {
-    constructor(message = 'Bad Request') { super(message, 400); }
+class ValidationError extends HttpError {
+    constructor(message = 'Bad Request') { super(400, message); }
 }
 
-class NotFoundError extends AppError {
-    constructor(message = 'Not Found') { super(message, 404); }
+class PaymentDeniedError extends HttpError {
+    constructor(message = 'Pagamento recusado') { super(400, message); }
 }
 
-class ForbiddenError extends AppError {
-    constructor(message = 'Acesso negado') { super(message, 403); }
+class ForbiddenError extends HttpError {
+    constructor(message = 'Acesso negado') { super(403, message); }
 }
 
-module.exports = { AppError, ValidationError, NotFoundError, ForbiddenError };
+class NotFoundError extends HttpError {
+    constructor(message = 'Não encontrado') { super(404, message); }
+}
+
+module.exports = { HttpError, ValidationError, PaymentDeniedError, ForbiddenError, NotFoundError };

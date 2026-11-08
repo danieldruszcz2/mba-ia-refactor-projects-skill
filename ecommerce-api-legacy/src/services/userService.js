@@ -1,13 +1,11 @@
-'use strict';
-
-function createUserService({ transaction, userRepository, enrollmentRepository, paymentRepository }) {
+function createUserService({ db, users, enrollments, payments }) {
     return {
-        // Remove o usuário com seus pagamentos e matrículas, sem deixar órfãos.
+        // Remove o usuário e, em cascata, seus pagamentos e matrículas (sem órfãos).
         deleteUser(userId) {
-            return transaction(async () => {
-                await paymentRepository.deleteByUserId(userId);
-                await enrollmentRepository.deleteByUserId(userId);
-                await userRepository.deleteById(userId);
+            return db.transaction(async (tx) => {
+                await payments.deleteByUserId(userId, tx);
+                await enrollments.deleteByUserId(userId, tx);
+                await users.deleteById(userId, tx);
             });
         },
     };

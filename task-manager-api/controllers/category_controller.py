@@ -1,8 +1,8 @@
-"""Casos de uso de categorias. Retornam (dados serializáveis, status HTTP)."""
-from models import Category, Task
-from utils.constants import DEFAULT_COLOR
+"""Casos de uso de categorias."""
+from models.category import Category
+from utils import validators as v
+from utils.constants import DEFAULT_CATEGORY_COLOR
 from utils.errors import NotFoundError, ValidationError
-from utils.validators import require_json_object, validate_color, validate_name
 
 
 def _get_category_or_404(category_id):
@@ -13,44 +13,45 @@ def _get_category_or_404(category_id):
 
 
 def list_categories():
-    counts = Task.count_by_category()
+    task_counts = Category.task_counts()
     result = []
     for category in Category.list_all():
         data = category.to_dict()
-        data['task_count'] = counts.get(category.id, 0)
+        data['task_count'] = task_counts.get(category.id, 0)
         result.append(data)
-    return result, 200
+    return result
 
 
 def create_category(data):
-    data = require_json_object(data)
-    if not data.get('name'):
+    data = v.require_payload(data)
+    name = data.get('name')
+    if not name:
         raise ValidationError('Nome é obrigatório')
 
     category = Category(
-        name=validate_name(data['name']),
-        description=data.get('description', ''),
-        color=validate_color(data.get('color', DEFAULT_COLOR)),
+        name=v.validate_name(name),
+        description=v.validate_optional_text(data.get('description', ''), 'Descrição inválida'),
+        color=v.validate_optional_text(data.get('color', DEFAULT_CATEGORY_COLOR), 'Cor inválida'),
     )
     category.save()
-    return category.to_dict(), 201
+    return category.to_dict()
 
 
 def update_category(category_id, data):
     category = _get_category_or_404(category_id)
-    data = require_json_object(data, allow_empty=True)
+    data = v.require_payload(data)
 
     if 'name' in data:
-        category.name = validate_name(data['name'])
+        category.name = v.validate_name(data['name'])
     if 'description' in data:
-        category.description = data['description']
+        category.description = v.validate_optional_text(data['description'], 'Descrição inválida')
     if 'color' in data:
-        category.color = validate_color(data['color'])
+        category.color = v.validate_optional_text(data['color'], 'Cor inválida')
 
     category.save()
-    return category.to_dict(), 200
+    return category.to_dict()
 
 
 def delete_category(category_id):
     _get_category_or_404(category_id).delete()
-    return {'message': 'Categoria deletada'}, 200
+    return {'message': 'Categoria deletada'}

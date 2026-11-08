@@ -1,11 +1,12 @@
 # Template do Relatório de Auditoria (Fase 2)
 
-Use **exatamente** esta estrutura. O mesmo texto é impresso no terminal e salvo em `reports/audit-report.md` (crie a pasta se não existir; sobrescreva se já houver um relatório anterior). O relatório é Markdown válido mesmo quando impresso.
+Use **exatamente** esta estrutura. O mesmo texto é impresso no terminal e salvo em `<raiz do repositório>/reports/audit-project-<N>.md` (regra completa de caminho e numeração no `SKILL.md`, Fase 2, passo 2; crie a pasta se não existir). O relatório é Markdown válido mesmo quando impresso.
 
 ## Regras de preenchimento
 
 - **Ordem:** CRITICAL → HIGH → MEDIUM → LOW. Dentro da mesma severidade, ordene pelo impacto (segurança antes de estrutura).
 - **Numeração:** `#1`, `#2`, ... contínua no relatório inteiro — o usuário usa esses números no `skip`.
+- **Location (tabela do Summary):** o mesmo `arquivo:linha` real do achado. **Nunca use curingas** (`routes/*.py`, `models/`, `vários arquivos`) nem um arquivo sem linha. Se o achado abrange muitos arquivos, liste os principais com linha e indique o resto: `routes/task_routes.py:11-63; routes/user_routes.py:42-90 (+1 arquivo)`.
 - **File:** caminho relativo à raiz do projeto + linha(s) reais: `<arquivo>:45`, `<arquivo>:45-62`, ou várias ocorrências separadas por vírgula: `<arquivo>:45, 88, 120-131`. Se o achado abrange vários arquivos, uma linha `File:` por arquivo.
 - **Description:** o que está errado, citando o trecho/identificador concreto (nome da função, variável, valor). 1–3 frases.
 - **Impact:** a consequência real (o que um atacante/usuário/mantenedor sofre). 1–2 frases.
@@ -16,6 +17,9 @@ Use **exatamente** esta estrutura. O mesmo texto é impresso no terminal e salvo
 - Sem achados de uma severidade? Mostre `0` no summary — não invente achados para "distribuir" severidades.
 
 ## Template
+
+O **arquivo salvo** começa com o bloco da Fase 1 (o mesmo texto impresso na Fase 1, com a tabela de endpoints, dentro de um bloco de código), seguido de uma linha em branco e do relatório abaixo. No terminal, a mensagem da Fase 2 também traz o bloco da Fase 1 antes do relatório.
+
 
 ````markdown
 ================================

@@ -1,4 +1,4 @@
-"""Instância do SQLAlchemy, inicialização do schema e helper de transação."""
+"""Instância do ORM, transações e inicialização do schema."""
 from contextlib import contextmanager
 
 from flask_sqlalchemy import SQLAlchemy
@@ -6,20 +6,20 @@ from flask_sqlalchemy import SQLAlchemy
 db = SQLAlchemy()
 
 
-def init_db(app):
-    """Chamado pelo composition root: liga o db à app e cria as tabelas."""
-    db.init_app(app)
-    with app.app_context():
-        import models  # noqa: F401 — registra as entidades no metadata
-        db.create_all()
-
-
 @contextmanager
 def transaction():
-    """Commit no sucesso; rollback e re-raise em qualquer erro."""
+    """Agrupa escritas: commit no fim, rollback se qualquer etapa falhar."""
     try:
         yield db.session
         db.session.commit()
     except Exception:
         db.session.rollback()
         raise
+
+
+def init_db(app):
+    db.init_app(app)
+    with app.app_context():
+        # Importa os models para registrá-los no metadata antes do create_all.
+        import models  # noqa: F401
+        db.create_all()

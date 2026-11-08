@@ -1,29 +1,29 @@
-"""Erros de domínio convertidos em respostas JSON pelo error handler central."""
+"""Erros de domínio, convertidos em respostas HTTP pelo error handler central."""
 
 
-class DomainError(Exception):
-    status_code = 400
+class AppError(Exception):
+    status_code = 500
 
     def __init__(self, message):
         super().__init__(message)
         self.message = message
 
 
-class ValidationError(DomainError):
+class ValidationError(AppError):
     status_code = 400
 
 
-class UnauthorizedError(DomainError):
+class UnauthorizedError(AppError):
     status_code = 401
 
 
-class ForbiddenError(DomainError):
+class ForbiddenError(AppError):
     status_code = 403
 
 
-class NotFoundError(DomainError):
+class NotFoundError(AppError):
     status_code = 404
 
 
-class ConflictError(DomainError):
+class ConflictError(AppError):
     status_code = 409

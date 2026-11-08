@@ -1,33 +1,27 @@
-'use strict';
+const { PAYMENT_STATUS, UNKNOWN_STUDENT } = require('../config/constants');
 
-const { PAYMENT_STATUS, UNKNOWN_STUDENT_NAME } = require('../config/constants');
-
-function createReportService({ reportRepository }) {
+function createReportService({ reports }) {
     return {
-        // Receita e alunos por curso, na ordem dos cursos (id) e das matrículas (id).
         async financialReport() {
-            const rows = await reportRepository.findCourseEnrollmentPayments();
-            const reportByCourse = new Map();
+            const rows = await reports.listCourseEnrollmentPayments();
+            const byCourse = new Map();
 
             for (const row of rows) {
-                if (!reportByCourse.has(row.course_id)) {
-                    reportByCourse.set(row.course_id, { course: row.course_title, revenue: 0, students: [] });
+                if (!byCourse.has(row.course_id)) {
+                    byCourse.set(row.course_id, { course: row.course_title, revenue: 0, students: [] });
                 }
                 if (row.enrollment_id === null) continue;
 
-                const courseReport = reportByCourse.get(row.course_id);
-                const hasPayment = row.payment_id !== null;
-
-                if (hasPayment && row.payment_status === PAYMENT_STATUS.PAID) {
-                    courseReport.revenue += row.payment_amount;
+                const entry = byCourse.get(row.course_id);
+                if (row.payment_status === PAYMENT_STATUS.PAID) {
+                    entry.revenue += row.payment_amount;
                 }
-                courseReport.students.push({
-                    student: row.user_id !== null ? row.user_name : UNKNOWN_STUDENT_NAME,
-                    paid: hasPayment ? row.payment_amount : 0,
+                entry.students.push({
+                    student: row.student_name ?? UNKNOWN_STUDENT,
+                    paid: row.payment_amount ?? 0,
                 });
             }
-
-            return [...reportByCourse.values()];
+            return [...byCourse.values()];
         },
     };
 }

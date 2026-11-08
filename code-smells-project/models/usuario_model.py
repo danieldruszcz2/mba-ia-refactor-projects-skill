@@ -1,11 +1,12 @@
 """Acesso a dados de usuários. A representação pública nunca inclui a senha."""
-from models.database import get_connection
-from utils.constants import TIPO_USUARIO_CLIENTE
+from models.database import get_db
+from utils.constants import TIPO_USUARIO_PADRAO
+from utils.security import hash_password, verify_password
 
 _COLUNAS_PUBLICAS = "id, nome, email, tipo, criado_em"
 
 
-def _para_dict(row):
+def to_public(row):
     return {
         "id": row["id"],
         "nome": row["nome"],
@@ -16,27 +17,42 @@ def _para_dict(row):
 
 
 def listar():
-    rows = get_connection().execute(f"SELECT {_COLUNAS_PUBLICAS} FROM usuarios").fetchall()
-    return [_para_dict(row) for row in rows]
+    rows = get_db().execute("SELECT " + _COLUNAS_PUBLICAS + " FROM usuarios").fetchall()
+    return [to_public(row) for row in rows]
 
 
 def buscar_por_id(usuario_id):
-    row = get_connection().execute(
-        f"SELECT {_COLUNAS_PUBLICAS} FROM usuarios WHERE id = ?", (usuario_id,)
+    row = get_db().execute(
+        "SELECT " + _COLUNAS_PUBLICAS + " FROM usuarios WHERE id = ?", (usuario_id,)
     ).fetchone()
-    return _para_dict(row) if row else None
+    return to_public(row) if row else None
 
 
-def buscar_credenciais_por_email(email):
-    """Uso interno (autenticação): devolve id, nome, email, tipo e o hash da senha."""
-    return get_connection().execute(
+def criar(nome, email, senha, tipo=TIPO_USUARIO_PADRAO):
+    conn = get_db()
+    with conn:
+        cursor = conn.execute(
+            "INSERT INTO usuarios (nome, email, senha, tipo) VALUES (?, ?, ?, ?)",
+            (nome, email, hash_password(senha), tipo),
+        )
+    return cursor.lastrowid
+
+
+def autenticar(email, senha):
+    """Retorna {id, nome, email, tipo} se as credenciais conferem; senão None.
+
+    Senhas legadas em texto puro são aceitas uma vez e regravadas com hash.
+    """
+    conn = get_db()
+    rows = conn.execute(
         "SELECT id, nome, email, tipo, senha FROM usuarios WHERE email = ? ORDER BY id", (email,)
     ).fetchall()
-
-
-def criar(nome, email, senha_hash, tipo=TIPO_USUARIO_CLIENTE):
-    cursor = get_connection().execute(
-        "INSERT INTO usuarios (nome, email, senha, tipo) VALUES (?, ?, ?, ?)",
-        (nome, email, senha_hash, tipo),
-    )
-    return cursor.lastrowid
+    for row in rows:
+        confere, precisa_rehash = verify_password(senha, row["senha"])
+        if not confere:
+            continue
+        if precisa_rehash:
+            with conn:
+                conn.execute("UPDATE usuarios SET senha = ? WHERE id = ?", (hash_password(senha), row["id"]))
+        return {"id": row["id"], "nome": row["nome"], "email": row["email"], "tipo": row["tipo"]}
+    return None

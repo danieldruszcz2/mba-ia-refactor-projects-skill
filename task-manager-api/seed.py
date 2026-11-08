@@ -1,25 +1,21 @@
-"""Script para popular o banco com dados iniciais (apaga os dados existentes)."""
+"""Script para popular o banco com dados iniciais (python seed.py)."""
 from datetime import timedelta
 
-from sqlalchemy import delete
-
 from app import create_app
-from models import Category, Task, User
+from models.category import Category
 from models.database import transaction
-from utils.constants import (
-    ROLE_ADMIN, ROLE_MANAGER, ROLE_USER, STATUS_CANCELLED, STATUS_DONE, STATUS_IN_PROGRESS,
-    STATUS_PENDING,
-)
-from utils.dates import utc_now
+from models.task import Task
+from models.user import User
+from utils.constants import ROLE_ADMIN, ROLE_MANAGER, ROLE_USER
+from utils.dates import utcnow
 
-# Credenciais apenas para desenvolvimento local (as senhas são gravadas com hash).
-SEED_USERS = [
+USERS = [
     {'name': 'João Silva', 'email': 'joao@email.com', 'password': '1234', 'role': ROLE_ADMIN},
     {'name': 'Maria Santos', 'email': 'maria@email.com', 'password': 'abcd', 'role': ROLE_USER},
     {'name': 'Pedro Oliveira', 'email': 'pedro@email.com', 'password': 'pass', 'role': ROLE_MANAGER},
 ]
 
-SEED_CATEGORIES = [
+CATEGORIES = [
     {'name': 'Backend', 'description': 'Tarefas de backend', 'color': '#3498db'},
     {'name': 'Frontend', 'description': 'Tarefas de frontend', 'color': '#2ecc71'},
     {'name': 'DevOps', 'description': 'Tarefas de infraestrutura', 'color': '#e74c3c'},
@@ -27,57 +23,57 @@ SEED_CATEGORIES = [
 ]
 
 
-def _seed_tasks(users, categories):
+def _tasks(users, categories):
+    now = utcnow()
     joao, maria, pedro = users
     backend, frontend, devops, bug = categories
-    now = utc_now()
     return [
-        {'title': 'Implementar autenticação JWT', 'description': 'Adicionar autenticação real com JWT', 'status': STATUS_PENDING, 'priority': 1, 'user': joao, 'category': backend, 'due_date': now - timedelta(days=3)},
-        {'title': 'Criar tela de login', 'description': 'Tela de login responsiva', 'status': STATUS_IN_PROGRESS, 'priority': 2, 'user': maria, 'category': frontend, 'due_date': now + timedelta(days=5)},
-        {'title': 'Configurar CI/CD', 'description': 'Pipeline com GitHub Actions', 'status': STATUS_DONE, 'priority': 2, 'user': pedro, 'category': devops, 'tags': 'devops,ci,github'},
-        {'title': 'Corrigir bug no filtro de busca', 'description': 'Filtro não funciona com caracteres especiais', 'status': STATUS_PENDING, 'priority': 1, 'user': joao, 'category': bug, 'due_date': now - timedelta(days=1)},
-        {'title': 'Adicionar paginação na API', 'description': 'Endpoints retornam todos os registros', 'status': STATUS_PENDING, 'priority': 3, 'user': joao, 'category': backend, 'due_date': now + timedelta(days=10)},
-        {'title': 'Escrever testes unitários', 'description': 'Cobertura mínima de 80%', 'status': STATUS_PENDING, 'priority': 2, 'user': maria, 'category': backend},
-        {'title': 'Documentar API com Swagger', 'description': 'Gerar documentação automática', 'status': STATUS_CANCELLED, 'priority': 4, 'user': pedro, 'category': backend},
-        {'title': 'Refatorar models', 'description': 'Melhorar organização dos models', 'status': STATUS_IN_PROGRESS, 'priority': 3, 'user': maria, 'category': backend, 'tags': 'refactor,tech-debt'},
-        {'title': 'Configurar monitoramento', 'description': 'Prometheus + Grafana', 'status': STATUS_PENDING, 'priority': 4, 'user': pedro, 'category': devops, 'due_date': now + timedelta(days=20)},
-        {'title': 'Melhorar validações de input', 'description': 'Usar marshmallow ou pydantic', 'status': STATUS_PENDING, 'priority': 3, 'user': joao, 'category': backend, 'tags': 'improvement,validation'},
+        {'title': 'Implementar autenticação JWT', 'description': 'Adicionar autenticação real com JWT', 'status': 'pending', 'priority': 1, 'user': joao, 'category': backend, 'due_date': now - timedelta(days=3)},
+        {'title': 'Criar tela de login', 'description': 'Tela de login responsiva', 'status': 'in_progress', 'priority': 2, 'user': maria, 'category': frontend, 'due_date': now + timedelta(days=5)},
+        {'title': 'Configurar CI/CD', 'description': 'Pipeline com GitHub Actions', 'status': 'done', 'priority': 2, 'user': pedro, 'category': devops, 'tags': 'devops,ci,github'},
+        {'title': 'Corrigir bug no filtro de busca', 'description': 'Filtro não funciona com caracteres especiais', 'status': 'pending', 'priority': 1, 'user': joao, 'category': bug, 'due_date': now - timedelta(days=1)},
+        {'title': 'Adicionar paginação na API', 'description': 'Endpoints retornam todos os registros', 'status': 'pending', 'priority': 3, 'user': joao, 'category': backend, 'due_date': now + timedelta(days=10)},
+        {'title': 'Escrever testes unitários', 'description': 'Cobertura mínima de 80%', 'status': 'pending', 'priority': 2, 'user': maria, 'category': backend},
+        {'title': 'Documentar API com Swagger', 'description': 'Gerar documentação automática', 'status': 'cancelled', 'priority': 4, 'user': pedro, 'category': backend},
+        {'title': 'Refatorar models', 'description': 'Melhorar organização dos models', 'status': 'in_progress', 'priority': 3, 'user': maria, 'category': backend, 'tags': 'refactor,tech-debt'},
+        {'title': 'Configurar monitoramento', 'description': 'Prometheus + Grafana', 'status': 'pending', 'priority': 4, 'user': pedro, 'category': devops, 'due_date': now + timedelta(days=20)},
+        {'title': 'Melhorar validações de input', 'description': 'Usar marshmallow ou pydantic', 'status': 'pending', 'priority': 3, 'user': joao, 'category': backend, 'tags': 'improvement,validation'},
     ]
 
 
 def seed_data(app):
     with app.app_context():
+        # Uma única transação: se qualquer etapa falhar, o banco volta ao estado anterior.
         with transaction() as session:
-            session.execute(delete(Task))
-            session.execute(delete(User))
-            session.execute(delete(Category))
+            Task.query.delete()
+            User.query.delete()
+            Category.query.delete()
 
-        with transaction() as session:
             users = []
-            for user_data in SEED_USERS:
-                user = User(name=user_data['name'], email=user_data['email'], role=user_data['role'])
-                user.set_password(user_data['password'])
+            for data in USERS:
+                user = User(name=data['name'], email=data['email'], role=data['role'])
+                user.set_password(data['password'])
                 users.append(user)
-            categories = [Category(**category_data) for category_data in SEED_CATEGORIES]
+            categories = [Category(**data) for data in CATEGORIES]
             session.add_all(users + categories)
-            session.flush()  # gera os ids usados pelas tasks
+            session.flush()
 
-            for task_data in _seed_tasks(users, categories):
+            for data in _tasks(users, categories):
                 session.add(Task(
-                    title=task_data['title'],
-                    description=task_data['description'],
-                    status=task_data['status'],
-                    priority=task_data['priority'],
-                    user_id=task_data['user'].id,
-                    category_id=task_data['category'].id,
-                    due_date=task_data.get('due_date'),
-                    tags=task_data.get('tags'),
+                    title=data['title'],
+                    description=data['description'],
+                    status=data['status'],
+                    priority=data['priority'],
+                    user_id=data['user'].id,
+                    category_id=data['category'].id,
+                    due_date=data.get('due_date'),
+                    tags=data.get('tags'),
                 ))
 
         print('Seed concluído com sucesso!')
-        print(f'  {User.count_all()} usuários')
-        print(f'  {Category.count_all()} categorias')
-        print(f'  {Task.count_all()} tasks')
+        print(f'  {User.count()} usuários')
+        print(f'  {Category.count()} categorias')
+        print(f'  {Task.count()} tasks')
 
 
 if __name__ == '__main__':

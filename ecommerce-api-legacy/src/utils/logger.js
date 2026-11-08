@@ -1,20 +1,18 @@
-'use strict';
-
 const LEVELS = Object.freeze({ debug: 10, info: 20, warn: 30, error: 40 });
 
 function createLogger(level = 'info') {
-    const threshold = LEVELS[level] ?? LEVELS.info;
-    const write = (name, method) => (message, ...details) => {
+    const threshold = LEVELS[level] || LEVELS.info;
+    const write = (name, stream) => (message, meta) => {
         if (LEVELS[name] < threshold) return;
-        // eslint-disable-next-line no-console
-        console[method](`${new Date().toISOString()} [${name.toUpperCase()}] ${message}`, ...details);
+        const line = `${new Date().toISOString()} ${name.toUpperCase()} ${message}`;
+        stream.write(meta ? `${line} ${JSON.stringify(meta)}\n` : `${line}\n`);
     };
-    return Object.freeze({
-        debug: write('debug', 'log'),
-        info: write('info', 'log'),
-        warn: write('warn', 'warn'),
-        error: write('error', 'error'),
-    });
+    return {
+        debug: write('debug', process.stdout),
+        info: write('info', process.stdout),
+        warn: write('warn', process.stderr),
+        error: write('error', process.stderr),
+    };
 }
 
 module.exports = { createLogger };

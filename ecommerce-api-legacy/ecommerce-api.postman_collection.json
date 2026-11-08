@@ -1,13 +1,14 @@
 {
   "info": {
     "name": "Ecommerce API Legacy (Frankenstein LMS)",
-    "description": "Todas as operações da ecommerce-api-legacy. Suba a API com `npm start` (porta 3000). O banco é SQLite em memória: reiniciar a API restaura os dados seed (usuário 1 = Leonan, cursos 1 = Clean Architecture R$997 e 2 = Docker R$497).\n\nRegras do checkout: cartão começando com '4' é aprovado; qualquer outro é recusado. Campos obrigatórios: usr, eml, c_id, card (pwd é opcional).",
+    "description": "Todas as operações da ecommerce-api-legacy. Suba a API com `npm start` (porta 3000). O banco é SQLite em memória: reiniciar a API restaura os dados seed (usuário 1 = Leonan, cursos 1 = Clean Architecture R$997 e 2 = Docker R$497).\n\nRegras do checkout: cartão começando com '4' é aprovado; qualquer outro é recusado. Campos obrigatórios: usr, eml (email válido), c_id (inteiro), card (12–19 dígitos); pwd é opcional.\n\nRotas administrativas (relatório financeiro e deleção de usuário) ficam desligadas por padrão e respondem 403. Para usá-las, suba a API com `ENABLE_ADMIN_ROUTES=true ADMIN_TOKEN=troque-me npm start` e ajuste a variável `adminToken` desta collection para o mesmo valor; ela é enviada no header `X-Admin-Token`.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "variable": [
     { "key": "baseUrl", "value": "http://localhost:3000" },
     { "key": "enrollmentId", "value": "" },
-    { "key": "userId", "value": "1" }
+    { "key": "userId", "value": "1" },
+    { "key": "adminToken", "value": "troque-me" }
   ],
   "item": [
     {
@@ -65,7 +66,7 @@
           }
         },
         {
-          "name": "Checkout - sem senha (usa default)",
+          "name": "Checkout - sem senha (gera senha aleatória)",
           "event": [
             {
               "listen": "prerequest",
@@ -171,6 +172,22 @@
           ],
           "request": {
             "method": "GET",
+            "header": [{ "key": "X-Admin-Token", "value": "{{adminToken}}" }],
+            "url": { "raw": "{{baseUrl}}/api/admin/financial-report", "host": ["{{baseUrl}}"], "path": ["api", "admin", "financial-report"] }
+          }
+        },
+        {
+          "name": "Relatório financeiro - sem token (403)",
+          "event": [
+            {
+              "listen": "test",
+              "script": { "type": "text/javascript", "exec": [
+                "pm.test('Status 403', () => pm.response.to.have.status(403));"
+              ] }
+            }
+          ],
+          "request": {
+            "method": "GET",
             "url": { "raw": "{{baseUrl}}/api/admin/financial-report", "host": ["{{baseUrl}}"], "path": ["api", "admin", "financial-report"] }
           }
         }
@@ -191,6 +208,7 @@
           ],
           "request": {
             "method": "DELETE",
+            "header": [{ "key": "X-Admin-Token", "value": "{{adminToken}}" }],
             "url": { "raw": "{{baseUrl}}/api/users/{{userId}}", "host": ["{{baseUrl}}"], "path": ["api", "users", "{{userId}}"] }
           }
         }

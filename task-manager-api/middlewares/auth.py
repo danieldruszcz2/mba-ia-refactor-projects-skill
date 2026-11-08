@@ -1,36 +1,40 @@
-"""Autorização de operações administrativas."""
+"""Autenticação por token assinado e autorização de operações administrativas."""
 from functools import wraps
 
 from flask import current_app, request
 
-from models import User
+from models.user import User
 from utils.errors import ForbiddenError
+from utils.security import read_token
 
-_BEARER_PREFIX = 'Bearer '
 
-
-def _bearer_token():
+def current_user():
+    """Usuário do header `Authorization: Bearer <token>`, ou None."""
     header = request.headers.get('Authorization', '')
-    if header.startswith(_BEARER_PREFIX):
-        return header[len(_BEARER_PREFIX):].strip()
-    return None
+    scheme, _, token = header.partition(' ')
+    if scheme.lower() != 'bearer' or not token:
+        return None
+    cfg = current_app.config
+    user_id = read_token(cfg['SECRET_KEY'], token.strip(), cfg['TOKEN_MAX_AGE_SECONDS'])
+    if user_id is None:
+        return None
+    user = User.get_by_id(user_id)
+    return user if user and user.active else None
 
 
-def require_admin():
-    """403 se as rotas admin estão desligadas ou se o token não é de um admin ativo."""
+def ensure_admin():
+    """Levanta 403 se as operações admin estão desligadas ou o chamador não é admin."""
     if not current_app.config['ENABLE_ADMIN_ROUTES']:
-        raise ForbiddenError('Operação administrativa desabilitada')
-
-    user_id = current_app.extensions['token_service'].verify(_bearer_token())
-    user = User.get_by_id(user_id) if user_id is not None else None
-    if not user or not user.active or not user.is_admin():
-        raise ForbiddenError('Acesso restrito a administradores')
+        raise ForbiddenError('Operações administrativas desabilitadas')
+    user = current_user()
+    if user is None or not user.is_admin():
+        raise ForbiddenError('Acesso negado')
     return user
 
 
 def admin_required(view):
     @wraps(view)
     def wrapper(*args, **kwargs):
-        require_admin()
+        ensure_admin()
         return view(*args, **kwargs)
     return wrapper

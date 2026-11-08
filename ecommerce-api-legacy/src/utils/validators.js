@@ -1,31 +1,20 @@
-'use strict';
+const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const CARD_PATTERN = /^\d{12,19}$/;
 
-const { ValidationError } = require('./errors');
+const isNonEmptyString = (value) => typeof value === 'string' && value.trim().length > 0;
 
-const isNonEmptyString = (value) => typeof value === 'string' && value.trim() !== '';
+const isEmail = (value) => isNonEmptyString(value) && EMAIL_PATTERN.test(value.trim());
 
-// Valida o body de POST /api/checkout. Os nomes de campo (usr, eml, pwd, c_id, card) são contrato da API.
-function parseCheckoutInput(body) {
-    if (!body || typeof body !== 'object') throw new ValidationError();
+const isCardNumber = (value) => typeof value === 'string' && CARD_PATTERN.test(value);
 
-    const { usr, eml, pwd, c_id: courseId, card } = body;
-
-    // Mesma regra de presença do código original (valores "falsy" são rejeitados).
-    if (!usr || !eml || !courseId || !card) throw new ValidationError();
-
-    if (!isNonEmptyString(usr) || !isNonEmptyString(eml) || !isNonEmptyString(card)) {
-        throw new ValidationError();
+// Aceita inteiro ou string numérica ("2"), como a API original aceitava.
+function toPositiveInteger(value) {
+    if (typeof value === 'number' && Number.isInteger(value) && value > 0) return value;
+    if (typeof value === 'string' && /^\d+$/.test(value.trim())) {
+        const parsed = Number.parseInt(value, 10);
+        return parsed > 0 ? parsed : null;
     }
-    if (pwd !== undefined && pwd !== null && typeof pwd !== 'string') throw new ValidationError();
-    if (typeof courseId !== 'number' && typeof courseId !== 'string') throw new ValidationError();
-
-    return {
-        userName: usr,
-        email: eml,
-        password: pwd || null,
-        courseId,
-        cardNumber: card,
-    };
+    return null;
 }
 
-module.exports = { parseCheckoutInput };
+module.exports = { isNonEmptyString, isEmail, isCardNumber, toPositiveInteger };

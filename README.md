@@ -474,13 +474,17 @@ O servidor sobe em modo debug e aceitando conexão de qualquer endereço. Para d
 
 A senha do banco e a chave do sistema de pagamento estão escritas direto no código. No checkout, o número do cartão aparece no log junto com essa chave, e a função que deveria proteger a senha do usuário não faz uma criptografia de verdade.
 
-#### MEDIUM
+#### CRITICAL
 
 Quase tudo fica em uma única classe: criação do banco, rotas, checkout e relatório. Fica difícil mexer em uma parte sem afetar as outras.
 
 #### MEDIUM
 
-O checkout e o relatório financeiro têm muitas funções uma dentro da outra, o que deixa o fluxo difícil de seguir. No relatório, se algum passo der erro, a resposta pode nem ser enviada.
+O checkout e o relatório financeiro têm muitas funções uma dentro da outra, o que deixa o fluxo difícil de seguir.
+
+#### MEDIUM
+
+Os erros não são tratados em um lugar só. No relatório, se algum passo der erro, a resposta pode nem ser enviada, e em outros pontos o erro é simplesmente ignorado.
 
 #### LOW
 
@@ -524,13 +528,26 @@ O `SKILL.md` descreve as 3 fases em ordem (análise, auditoria e refatoração) 
 - `anti-patterns-catalog.md`: a lista de problemas, com sinais de detecção e severidade.
 - `report-template.md`: o formato do relatório da Fase 2.
 - `mvc-guidelines.md`: as regras da estrutura em camadas e o que cada camada pode fazer.
-- `refactoring-playbook.md`: como corrigir cada problema, com exemplos de código.
+- `refactoring-playbook.md`: os 15 padrões de transformação (P-01 a P-15). Cada um tem o procedimento e um **exemplo de código antes/depois**, em Python e/ou JavaScript (40 blocos de código no total).
 - `validation.md`: como subir a aplicação, testar as rotas e comparar o antes e o depois.
 - `stacks/`: um guia por linguagem (Python, Node, Java, .NET, Go, PHP e Ruby).
 
 Também tem um script, `scripts/smoke_test.py`, que chama as rotas da API antes e depois da refatoração e compara as respostas.
 
 Na Fase 2 a skill para e pede confirmação antes de mexer em qualquer arquivo, e dá para pular achados específicos (por exemplo `y, skip 3,7`).
+
+O relatório da Fase 2 é salvo em `reports/audit-project-<N>.md` **na raiz do repositório**, e não dentro do projeto. A skill descobre a raiz com `git rev-parse --show-toplevel`. O número `N` vem do argumento da invocação (`/refactor-arch 2`). Sem argumento, ela reaproveita o número de um relatório anterior do mesmo projeto ou usa o próximo número livre. Os arquivos de validação da Fase 3 (`endpoints.json`, `baseline.json`, `after.json`) ficam em `reports/` dentro de cada projeto, porque pertencem a ele.
+
+### Correções após a primeira avaliação
+
+A primeira entrega foi reprovada por dois motivos, e os dois foram corrigidos:
+
+1. **O playbook não tinha exemplos de código.** Os 15 padrões estavam descritos só em texto. Agora cada padrão traz um bloco "Exemplo — antes" e um "Exemplo — depois", com código real (SQL concatenado → parametrizado, God Class → camadas, `try/except` em todo handler → error handler central, MD5 → scrypt com rehash, rota admin aberta → `admin_required`, N+1 → `IN`/JOIN, escritas soltas → transação, callbacks → async/await, validação duplicada → validador único, `utcnow()` → `datetime.now(timezone.utc)`, `print` → logger, conexão global → `create_app` + conexão por requisição, código morto). Os exemplos usam entidades genéricas (`user`, `item`, `order`), e o mecanismo de outras stacks continua nos guias de `stacks/`.
+2. **Os relatórios estavam no lugar errado** (`<projeto>/reports/audit-report.md`). O `SKILL.md` e o `report-template.md` passaram a salvar em `reports/audit-project-<N>.md` na raiz.
+
+Também reforcei no `SKILL.md` que o bloco `PHASE 1: PROJECT ANALYSIS` é obrigatório. Ele é impresso no terminal, repetido na mensagem da Fase 2 e salvo no topo do relatório. O template passou a proibir curingas (`routes/*.py`) na tabela de resumo.
+
+Depois das correções, voltei os 3 projetos ao código original (commit `6d1ce62`), copiei a skill nova para os três e **rodei a skill de novo do zero** com `claude "/refactor-arch"` dentro de cada projeto. Em cada um, a skill parou na Fase 2, eu revisei o relatório e confirmei a Fase 3.
 
 ### Anti-patterns do catálogo
 
@@ -559,17 +576,25 @@ Testei nos 3 projetos, dois em Python/Flask e um em Node/Express, e a mesma skil
 
 ## Resultados
 
+Os números e as evidências abaixo são da execução final da skill. Os 3 projetos voltaram ao código original e eu executei `claude "/refactor-arch"` dentro de cada pasta. A skill parou na Fase 2, eu revisei o relatório e confirmei a Fase 3.
+
 ### Resumo das auditorias
 
 | Projeto | CRITICAL | HIGH | MEDIUM | LOW | Total |
 |---|---|---|---|---|---|
 | code-smells-project | 5 | 8 | 3 | 4 | 20 |
-| ecommerce-api-legacy | 5 | 6 | 4 | 4 | 19 |
+| ecommerce-api-legacy | 5 | 5 | 5 | 4 | 19 |
 | task-manager-api | 4 | 5 | 6 | 4 | 19 |
 
-Os relatórios completos estão em `reports/audit-report.md` dentro de cada projeto.
+Os relatórios completos, que são a saída da Fase 2, estão na raiz do repositório:
 
-No `task-manager-api`, o achado #9 (apagar categoria deixaria tarefas órfãs) se mostrou um falso positivo durante a Fase 3. A própria skill testou e registrou isso no relatório.
+- [`reports/audit-project-1.md`](reports/audit-project-1.md)
+- [`reports/audit-project-2.md`](reports/audit-project-2.md)
+- [`reports/audit-project-3.md`](reports/audit-project-3.md)
+
+Cada um começa com o bloco `PHASE 1: PROJECT ANALYSIS` impresso pela skill, seguido do relatório de auditoria e da pergunta de confirmação.
+
+No `task-manager-api`, a skill registrou durante a Fase 3 uma errata no achado sobre deleção de categoria (`audit-project-3.md`, linha 152). Ela testou o código original e viu que o relacionamento do ORM já anula `category_id`, então não alterou o código por causa disso.
 
 ### code-smells-project
 
@@ -586,10 +611,10 @@ database.py      conexão global, criação das tabelas e seed
 
 ```
 app.py           create_app: monta config, banco, erros e rotas
-config/          leitura das variáveis de ambiente
-models/          conexão por requisição + um model por entidade
+config/          leitura das variáveis de ambiente (settings.py)
+models/          conexão por requisição + um model por entidade (produto, usuario, pedido, sistema)
 services/        regras de pedido e notificações
-controllers/     fluxo de cada caso de uso
+controllers/     fluxo de cada caso de uso (produto, usuario, pedido, sistema)
 routes/          Blueprints (HTTP → controller)
 middlewares/     tratamento de erro central e proteção das rotas admin
 utils/           constantes, erros, validações e hash de senha
@@ -598,17 +623,17 @@ utils/           constantes, erros, validações e hash de senha
 **Checklist**
 
 Fase 1 — Análise
-- [x] Linguagem detectada corretamente (Python)
+- [x] Linguagem detectada corretamente (Python (versão não declarada; ambiente: 3.14.4))
 - [x] Framework detectado corretamente (Flask 3.1.1)
-- [x] Domínio da aplicação descrito corretamente (API de loja)
-- [x] Número de arquivos analisados condiz com a realidade (4 arquivos)
+- [x] Domínio da aplicação descrito corretamente (API de e-commerce — produtos, usuários (login), pedidos com itens e relatório de vendas)
+- [x] Número de arquivos analisados condiz com a realidade (4 files analyzed | ~780 lines of code)
 
 Fase 2 — Auditoria
 - [x] Relatório segue o template definido nos arquivos de referência
 - [x] Cada finding tem arquivo e linhas exatos
 - [x] Findings ordenados por severidade (CRITICAL → LOW)
-- [x] Mínimo de 5 findings identificados (20)
-- [x] Detecção de APIs deprecated incluída (verificada, nenhuma encontrada)
+- [x] Mínimo de 5 findings identificados (20: 5 CRITICAL, 8 HIGH, 3 MEDIUM, 4 LOW)
+- [x] Detecção de APIs deprecated incluída (verificada; o relatório registra que não há API deprecated em Python 3.14 / Flask 3.1.1)
 - [x] Skill pausa e pede confirmação antes da Fase 3
 
 Fase 3 — Refatoração
@@ -622,7 +647,11 @@ Fase 3 — Refatoração
 - [x] Aplicação inicia sem erros
 - [x] Endpoints originais respondem corretamente
 
-No teste das rotas, 31 de 37 chamadas ficaram iguais às de antes da refatoração. As 6 diferenças foram mudanças de segurança esperadas: o `/health` não mostra mais a chave secreta, o login não aceita mais injeção de SQL, as rotas admin respondem 403 por padrão e entradas inválidas passaram de erro 500 para 400.
+Na validação da skill (`baseline.json` × `after.json`) nenhum endpoint respondeu 5xx, e a versão original tinha três 500. Dos 33 endpoints comparados, 27 ficaram iguais à baseline e 2 foram pulados. As 6 diferenças são mudanças de segurança declaradas:
+- o `/health` não mostra mais `secret_key`, `db_path` nem `debug`;
+- três entradas inválidas passaram de 500 para 400;
+- o login com SQL injection agora responde 401;
+- pedido com quantidade negativa agora responde 400.
 
 ### ecommerce-api-legacy
 
@@ -638,7 +667,7 @@ src/utils.js        configuração com segredos, cache global e "criptografia"
 
 ```
 src/app.js          entry point (npm start continua igual)
-src/createApp.js    monta config, banco, middlewares e rotas
+src/createApp.js    composition root: monta config, banco, middlewares e rotas
 src/config/         variáveis de ambiente e constantes
 src/models/         conexão e um repositório por tabela
 src/services/       checkout, relatório, usuário e gateway de pagamento
@@ -651,17 +680,17 @@ src/utils/          erros, validação, hash de senha, logger e máscara de cart
 **Checklist**
 
 Fase 1 — Análise
-- [x] Linguagem detectada corretamente (JavaScript / Node.js)
-- [x] Framework detectado corretamente (Express 4.22.1)
-- [x] Domínio da aplicação descrito corretamente (plataforma de cursos com checkout)
-- [x] Número de arquivos analisados condiz com a realidade (3 arquivos)
+- [x] Linguagem detectada corretamente (JavaScript (Node.js, CommonJS) — versão não declarada (ambiente: v24.13.0))
+- [x] Framework detectado corretamente (Express ^4.18.2 (resolvido 4.22.1 no lockfile))
+- [x] Domínio da aplicação descrito corretamente (API de LMS com checkout — usuários, cursos, matrículas, pagamentos e logs de auditoria)
+- [x] Número de arquivos analisados condiz com a realidade (3 files analyzed | ~180 lines of code)
 
 Fase 2 — Auditoria
 - [x] Relatório segue o template definido nos arquivos de referência
 - [x] Cada finding tem arquivo e linhas exatos
 - [x] Findings ordenados por severidade (CRITICAL → LOW)
-- [x] Mínimo de 5 findings identificados (19)
-- [x] Detecção de APIs deprecated incluída (verificada, nenhuma encontrada)
+- [x] Mínimo de 5 findings identificados (19: 5 CRITICAL, 5 HIGH, 5 MEDIUM, 4 LOW)
+- [x] Detecção de APIs deprecated incluída (verificada; o relatório registra que não há API deprecated em Node 24 / Express 4.22 / sqlite3 5.1)
 - [x] Skill pausa e pede confirmação antes da Fase 3
 
 Fase 3 — Refatoração
@@ -675,7 +704,11 @@ Fase 3 — Refatoração
 - [x] Aplicação inicia sem erros
 - [x] Endpoints originais respondem corretamente
 
-Sem token de admin, 6 de 11 chamadas ficaram iguais. As diferenças são o relatório financeiro e a exclusão de usuário, que agora pedem token (403). A outra diferença é um checkout com cartão inválido, que antes derrubava o servidor e agora responde 400. Rodando de novo com o token de admin, todas as rotas responderam como antes.
+Os 11 cenários testados responderam sem 5xx. Com as rotas admin desligadas (padrão), 6 ficaram iguais à baseline. As 5 diferenças são as mudanças declaradas:
+- quatro chamadas às rotas admin (relatório financeiro e exclusão de usuário) agora respondem 403;
+- o checkout com cartão que não é texto derrubava o processo e agora responde 400.
+
+Com `ENABLE_ADMIN_ROUTES=true` e o token (`after-admin.json`), 10 de 11 ficaram iguais, e a única diferença é esse crash, que virou 400.
 
 ### task-manager-api
 
@@ -695,28 +728,30 @@ seed.py
 
 ```
 app.py          create_app (python app.py continua igual)
-config/         variáveis de ambiente
-models/         entidades + database.py
-services/       autenticação e relatórios
-controllers/    fluxo de cada recurso (tasks, users, categorias, relatórios)
-routes/         Blueprints finos; categorias saíram de report_routes
-middlewares/    tratamento de erro central e autorização admin
-utils/          constantes, validações, erros, datas e hash de senha
+config/         variáveis de ambiente (settings.py)
+models/         entidades + database.py (todo o acesso ao ORM)
+controllers/    fluxo de cada recurso (tasks, users, categorias, relatórios, main)
+routes/         Blueprints finos; categorias ganharam arquivo próprio
+middlewares/    tratamento de erro central e autorização (auth.py)
+utils/          constantes, validações, erros, datas, estatísticas e hash de senha
+seed.py
 ```
+
+Os helpers e o serviço que ninguém usava foram removidos ou incorporados às camadas certas.
 
 **Checklist**
 
 Fase 1 — Análise
-- [x] Linguagem detectada corretamente (Python)
-- [x] Framework detectado corretamente (Flask 3.0.0 + Flask-SQLAlchemy)
-- [x] Domínio da aplicação descrito corretamente (gerenciador de tarefas)
-- [x] Número de arquivos analisados condiz com a realidade (15 arquivos)
+- [x] Linguagem detectada corretamente (Python (versão não declarada; ambiente: 3.14.4))
+- [x] Framework detectado corretamente (Flask 3.0.0)
+- [x] Domínio da aplicação descrito corretamente (API de gerenciamento de tarefas — tasks, users, categories e relatórios de produtividade)
+- [x] Número de arquivos analisados condiz com a realidade (15 files analyzed | ~1158 lines of code)
 
 Fase 2 — Auditoria
 - [x] Relatório segue o template definido nos arquivos de referência
 - [x] Cada finding tem arquivo e linhas exatos
 - [x] Findings ordenados por severidade (CRITICAL → LOW)
-- [x] Mínimo de 5 findings identificados (19)
+- [x] Mínimo de 5 findings identificados (19: 4 CRITICAL, 5 HIGH, 6 MEDIUM, 4 LOW)
 - [x] Detecção de APIs deprecated incluída (`datetime.utcnow()` e `Model.query.get()`)
 - [x] Skill pausa e pede confirmação antes da Fase 3
 
@@ -731,112 +766,131 @@ Fase 3 — Refatoração
 - [x] Aplicação inicia sem erros
 - [x] Endpoints originais respondem corretamente
 
-34 de 44 chamadas ficaram iguais. As diferenças foram o hash da senha, que não aparece mais nas respostas, a criação de usuário admin e a exclusão de usuário, que agora pedem autorização (403), e entradas inválidas que passaram de 500 para 400.
+Os 34 endpoints responderam sem 5xx. Sem token, 25 ficaram iguais à baseline. As 9 diferenças são mudanças de segurança declaradas:
+- o campo `password` saiu das respostas de usuário;
+- criar usuário admin, mudar `role` e apagar usuário sem token de admin agora respondem 403;
+- três entradas inválidas passaram de 500 para 400.
+
+Com token de admin (`after-admin.json`), 26 de 34 ficaram iguais, e o restante é a remoção do `password` e os 400 de validação.
 
 ### Aplicações rodando após a refatoração
 
-Subi cada projeto com o comando de start original e fiz algumas chamadas com `curl`. Abaixo estão o log do servidor e as respostas recebidas (cortei as respostas longas). Para não alterar os dados reais, usei uma cópia do banco nos projetos Python.
+Na Fase 3, a skill sobe cada aplicação refatorada com o comando de start original e chama todos os endpoints mapeados na Fase 1, usando `scripts/smoke_test.py`. Os logs abaixo foram gerados a partir de `reports/after.json` de cada projeto. Cada linha mostra o status devolvido pela app refatorada e, quando muda, o status da versão original.
 
 **code-smells-project** (`python app.py`)
 
 ```
-2026-11-01 19:14:59,117 INFO [__main__] Servidor iniciado em http://127.0.0.1:5000
- * Serving Flask app 'app'
- * Debug mode: off
- * Running on http://127.0.0.1:5000
-2026-11-01 19:14:59,434 INFO [werkzeug] "GET /health HTTP/1.1" 200 -
-2026-11-01 19:14:59,628 INFO [werkzeug] "GET /produtos HTTP/1.1" 200 -
-2026-11-01 19:14:59,785 INFO [werkzeug] "GET /produtos/busca?q=mouse HTTP/1.1" 200 -
-2026-11-01 19:15:00,034 INFO [controllers.usuario_controller] Login bem-sucedido para usuario 1
-2026-11-01 19:15:00,034 INFO [werkzeug] "POST /login HTTP/1.1" 200 -
-2026-11-01 19:15:00,182 INFO [controllers.usuario_controller] Tentativa de login falhou
-2026-11-01 19:15:00,182 INFO [werkzeug] "POST /login HTTP/1.1" 401 -
-2026-11-01 19:15:00,313 INFO [werkzeug] "POST /admin/reset-db HTTP/1.1" 403 -
+# smoke test da skill contra a app refatorada (http://127.0.0.1:5000) — reports/after.json
+OK    GET    /                                        -> 200  [index]
+OK    GET    /health                                  -> 200  [health]
+OK    GET    /produtos                                -> 200  [list-produtos]
+OK    GET    /produtos/busca?q=mouse&categoria=inform -> 200  [busca-produtos]
+OK    GET    /produtos/busca?preco_min=abc            -> 400  [busca-produtos-preco-invalido]   (antes: 500)
+OK    GET    /produtos/1                              -> 200  [get-produto]
+OK    GET    /produtos/9999                           -> 404  [get-produto-404]
+OK    POST   /produtos                                -> 201  [create-produto]
+OK    POST   /produtos                                -> 400  [create-produto-400]
+OK    POST   /produtos                                -> 400  [create-produto-preco-string]   (antes: 500)
+OK    GET    /produtos/11                             -> 200  [get-produto-criado]
+OK    PUT    /produtos/11                             -> 200  [update-produto]
+OK    GET    /usuarios                                -> 200  [list-usuarios]
+OK    GET    /usuarios/1                              -> 200  [get-usuario]
+OK    GET    /usuarios/9999                           -> 404  [get-usuario-404]
+OK    POST   /usuarios                                -> 201  [create-usuario]
+OK    POST   /login                                   -> 200  [login-admin]
+OK    POST   /login                                   -> 200  [login-admin-again]
+OK    POST   /login                                   -> 200  [login-usuario-criado]
+OK    POST   /login                                   -> 401  [login-401]
+OK    POST   /login                                   -> 401  [login-sqli]   (antes: 200)
+OK    POST   /login                                   -> 400  [login-sem-body]   (antes: 500)
+OK    POST   /pedidos                                 -> 201  [create-pedido]
+OK    POST   /pedidos                                 -> 400  [create-pedido-estoque]
+OK    POST   /pedidos                                 -> 400  [create-pedido-vazio]
+OK    POST   /pedidos                                 -> 400  [create-pedido-quantidade-negativa]   (antes: 201)
+OK    GET    /pedidos                                 -> 200  [list-pedidos]
+OK    GET    /pedidos/usuario/2                       -> 200  [list-pedidos-usuario]
+OK    PUT    /pedidos/1/status                        -> 200  [update-status-pedido]
+OK    PUT    /pedidos/1/status                        -> 400  [update-status-pedido-400]
+OK    GET    /relatorios/vendas                       -> 200  [relatorio-vendas]
+OK    DELETE /produtos/11                             -> 200  [delete-produto]
+OK    DELETE /produtos/11                             -> 404  [delete-produto-404]
+OK    POST   /admin/query                             -> 403  [admin-query]   (antes: não executado na baseline: perigoso: SQL arbitrário)
+OK    POST   /admin/reset-db                          -> 403  [admin-reset-db]   (antes: não executado na baseline: destrutivo: apaga o banco)
 ```
-
-```
-$ curl http://127.0.0.1:5000/health
-200 {"counts":{"pedidos":0,"produtos":11,"usuarios":3},"database":"connected","status":"ok","versao":"1.0.0"}
-
-$ curl http://127.0.0.1:5000/produtos/busca?q=mouse
-200 {"dados":[{"ativo":1,"categoria":"informatica",...,"descricao":"Mouse sem fio er...
-
-$ curl -X POST http://127.0.0.1:5000/login -d '{"email":"admin@loja.com","senha":"admin123"}'
-200 {"dados":{"email":"admin@loja.com","id":1,"nome":"Admin","tipo":"admin"},"mensagem":"Login OK","sucesso":true}
-
-$ curl -X POST http://127.0.0.1:5000/login -d "{\"email\":\"admin@loja.com' OR '1'='1\",\"senha\":\"x\"}"
-401 {"erro":"Email ou senha inválidos","sucesso":false}
-
-$ curl -X POST http://127.0.0.1:5000/admin/reset-db
-403 {"erro":"Rotas administrativas desabilitadas"}
-```
-
-O `/health` não mostra mais a chave secreta, o login com injeção de SQL é recusado e a rota que apagava o banco está bloqueada.
 
 **ecommerce-api-legacy** (`npm start`)
 
 ```
-2026-11-01T22:15:01.803Z [WARN] PAYMENT_GATEWAY_KEY não definida (gateway simulado).
-2026-11-01T22:15:01.841Z [INFO] LMS API rodando na porta 3000
-2026-11-01T22:15:02.221Z [INFO] Processando pagamento de 497 no cartão **** **** **** 4444
-2026-11-01T22:15:02.253Z [INFO] Checkout concluído: usuário 2, curso "Docker"
+# smoke test da skill contra a app refatorada (http://127.0.0.1:3000) — reports/after.json
+OK    GET    /api/admin/financial-report              -> 403  [financial-report-initial]   (antes: 200)
+OK    POST   /api/checkout                            -> 200  [checkout-new-user]
+OK    POST   /api/checkout                            -> 200  [checkout-existing-user]
+OK    POST   /api/checkout                            -> 200  [checkout-no-password]
+OK    POST   /api/checkout                            -> 400  [checkout-payment-denied]
+OK    POST   /api/checkout                            -> 400  [checkout-missing-fields]
+OK    POST   /api/checkout                            -> 404  [checkout-course-not-found]
+OK    GET    /api/admin/financial-report              -> 403  [financial-report-after-checkout]   (antes: 200)
+OK    DELETE /api/users/2                             -> 403  [delete-user]   (antes: 200)
+OK    GET    /api/admin/financial-report              -> 403  [financial-report-after-delete]   (antes: 200)
+OK    POST   /api/checkout                            -> 400  [checkout-card-not-string]   (antes: processo derrubado, sem resposta)
 ```
 
-```
-$ curl -X POST http://127.0.0.1:3000/api/checkout -d '{"usr":"Ana","eml":"ana@email.com","pwd":"senha123","c_id":2,"card":"4111222233334444"}'
-200 {"msg":"Sucesso","enrollment_id":2}
-
-$ curl -X POST http://127.0.0.1:3000/api/checkout -d '{"usr":"Ana"}'
-400 Bad Request
-
-$ curl http://127.0.0.1:3000/api/admin/financial-report
-403 Acesso negado
-
-$ curl -X DELETE http://127.0.0.1:3000/api/users/1
-403 Acesso negado
-```
-
-O checkout continua funcionando, e agora o log mostra só os 4 últimos dígitos do cartão, sem a chave do gateway. As rotas de admin pedem token.
-
-**task-manager-api** (`python app.py`)
+**task-manager-api** (`python seed.py` e depois `python app.py`)
 
 ```
- * Serving Flask app 'app'
- * Debug mode: off
- * Running on http://127.0.0.1:5000
-2026-11-01 19:15:04,964 INFO werkzeug: "GET /health HTTP/1.1" 200 -
-2026-11-01 19:15:05,110 INFO werkzeug: "GET /tasks HTTP/1.1" 200 -
-2026-11-01 19:15:05,248 INFO werkzeug: "GET /users/1 HTTP/1.1" 200 -
-2026-11-01 19:15:05,494 INFO werkzeug: "POST /login HTTP/1.1" 200 -
-2026-11-01 19:15:05,638 INFO werkzeug: "GET /reports/summary HTTP/1.1" 200 -
-2026-11-01 19:15:05,787 INFO werkzeug: "POST /tasks HTTP/1.1" 400 -
+# smoke test da skill contra a app refatorada (http://127.0.0.1:5000) — reports/after.json
+OK    GET    /                                        -> 200  [index]
+OK    GET    /health                                  -> 200  [health]
+OK    POST   /login                                   -> 200  [login]
+OK    POST   /login                                   -> 401  [login-invalid]
+OK    GET    /tasks                                   -> 200  [list-tasks]
+OK    GET    /tasks/1                                 -> 200  [get-task]
+OK    GET    /tasks/9999                              -> 404  [get-task-404]
+OK    GET    /tasks/search?q=a&status=pending&priorit -> 200  [search-tasks]
+OK    GET    /tasks/search?priority=abc               -> 400  [search-tasks-bad-priority]   (antes: 500)
+OK    GET    /tasks/stats                             -> 200  [task-stats]
+OK    GET    /users                                   -> 200  [list-users]
+OK    GET    /users/1                                 -> 200  [get-user]
+OK    GET    /users/9999                              -> 404  [get-user-404]
+OK    GET    /users/1/tasks                           -> 200  [get-user-tasks]
+OK    GET    /categories                              -> 200  [list-categories]
+OK    GET    /reports/summary                         -> 200  [reports-summary]
+OK    GET    /reports/user/1                          -> 200  [reports-user]
+OK    POST   /categories                              -> 201  [create-category]
+OK    POST   /users                                   -> 201  [create-user]
+OK    POST   /users                                   -> 409  [create-user-duplicate]
+OK    POST   /users                                   -> 403  [create-admin-user-anon]   (antes: 201)
+OK    POST   /tasks                                   -> 201  [create-task]
+OK    POST   /tasks                                   -> 400  [create-task-invalid-title]
+OK    POST   /tasks                                   -> 400  [create-task-bad-priority]   (antes: 500)
+OK    GET    /tasks/11                                -> 200  [get-created-task]
+OK    PUT    /tasks/11                                -> 200  [update-task]
+OK    PUT    /users/4                                 -> 200  [update-user]
+OK    PUT    /users/4                                 -> 400  [update-user-active-invalid]   (antes: 500)
+OK    PUT    /users/4                                 -> 403  [update-user-role]   (antes: 200)
+OK    PUT    /categories/5                            -> 200  [update-category]
+OK    DELETE /tasks/11                                -> 200  [delete-task]
+OK    DELETE /categories/5                            -> 200  [delete-category]
+OK    DELETE /users/4                                 -> 403  [delete-user]   (antes: 200)
+OK    GET    /rota-inexistente                        -> 404  [not-found-route]
 ```
 
+Para conferir a comparação completa (status e formato do JSON) de qualquer projeto:
+
+```bash
+python .claude/skills/refactor-arch/scripts/smoke_test.py compare \
+  --baseline reports/baseline.json --current reports/after.json
 ```
-$ curl http://127.0.0.1:5000/tasks
-200 [{"category_id":1,"category_name":"Backend","created_at":"2026-11-01 20:36:25.884764","description":"Adicionar...
-
-$ curl http://127.0.0.1:5000/users/1
-200 {"active":true,"created_at":"2026-11-01 20:36:25.861960","email":"joao@email.com","id":1,"name":"João Sil...
-
-$ curl -X POST http://127.0.0.1:5000/login -d '{"email":"joao@email.com","password":"1234"}'
-200 {"message":"Login realizado com sucesso","token":"eyJ1c2VyX2lkIjoxfQ.aue56Q.2jca7Vp9...","user":...
-
-$ curl http://127.0.0.1:5000/reports/summary
-200 {"generated_at":"2026-11-01 22:15:05.629874","overdue":{"count":2,...
-
-$ curl -X POST http://127.0.0.1:5000/tasks -d '{"title":"Teste","priority":"alta"}'
-400 {"error":"Prioridade inválida"}
-```
-
-O usuário não traz mais o campo `password`, o login devolve um token assinado em vez do `fake-jwt-token` e a prioridade inválida, que antes dava erro 500, agora responde 400.
 
 ### Como a skill se comportou em stacks diferentes
 
-- **Python x Node:** a mesma skill funcionou nos três projetos sem alteração. Ela leu o guia de Python nos projetos Flask e o de Node no Express, e a estrutura final seguiu o jeito de cada um (Blueprints no Flask, repositórios e middlewares no Express).
-- **Nível de organização:** nos projetos bagunçados (`code-smells-project` e `ecommerce-api-legacy`) a skill montou as camadas do zero. No `task-manager-api`, que já tinha pastas, ela aproveitou o que existia e corrigiu o conteúdo, como as rotas que faziam tudo e os arquivos que ninguém usava.
-- **APIs deprecated:** só apareceram no `task-manager-api`. Nos outros dois a skill verificou e registrou que não encontrou nenhuma, em vez de inventar.
-- **Particularidades:** no Node ela tratou também o excesso de callbacks, que não existe nos projetos Python. Como o banco do `ecommerce-api-legacy` fica em memória, não foi preciso fazer backup dos dados para os testes.
+- **Python × Node:** a mesma skill funcionou nos três projetos sem alteração. Ela leu o guia de Python nos projetos Flask e o de Node no Express, e a estrutura final seguiu o jeito de cada um (Blueprints no Flask; repositórios, `createApp` e middlewares no Express).
+- **Nível de organização:** nos projetos desestruturados (`code-smells-project` e `ecommerce-api-legacy`), a skill montou as camadas do zero. No `task-manager-api`, que já tinha pastas, a Fase 1 classificou a arquitetura como "camadas nominais". Ela aproveitou o que existia, criou `controllers/` e `middlewares/` e tirou das rotas a validação, as regras e as consultas.
+- **APIs deprecated:** só apareceram no `task-manager-api`, onde foram corrigidas com um helper único de datas e `db.session.get()`. Nos outros dois, a skill verificou e registrou que não havia nenhuma, sem inventar achados.
+- **Particularidades:**
+  - No Node, a skill também tratou o callback hell e os contadores manuais, que não existem nos projetos Python.
+  - Como o banco do `ecommerce-api-legacy` fica em memória, não foi preciso fazer backup dos dados antes do smoke test.
+  - Nos projetos com SQLite em arquivo, a skill protegeu os dados antes de chamar os endpoints.
 
 ## Como Executar
 
@@ -856,18 +910,20 @@ Em cada projeto, entre na pasta e chame a skill:
 ```bash
 # Projeto 1
 cd code-smells-project
-claude "/refactor-arch"
+claude "/refactor-arch 1"
 
 # Projeto 2
 cd ../ecommerce-api-legacy
-claude "/refactor-arch"
+claude "/refactor-arch 2"
 
 # Projeto 3
 cd ../task-manager-api
-claude "/refactor-arch"
+claude "/refactor-arch 3"
 ```
 
-A skill faz a análise e a auditoria, salva o relatório em `reports/audit-report.md` e para pedindo confirmação. Nesse momento dá para responder:
+O número é opcional e define o nome do relatório (`reports/audit-project-<N>.md` na raiz do repositório). Sem ele, a skill reaproveita o número de um relatório anterior do mesmo projeto ou usa o próximo número livre, então rodar na ordem 1, 2, 3 dá o mesmo resultado.
+
+A skill faz a análise e a auditoria, salva o relatório em `reports/audit-project-<N>.md` e para pedindo confirmação. Nesse momento dá para responder:
 
 - `y` para corrigir tudo;
 - `n` para sair sem mexer em nada;
@@ -879,8 +935,9 @@ Neste repositório os 3 projetos já estão refatorados. Para rodar a skill no c
 git worktree add ../projeto-original 6d1ce62
 cp -r code-smells-project/.claude ../projeto-original/code-smells-project/
 cd ../projeto-original/code-smells-project
-claude "/refactor-arch"
+claude "/refactor-arch 1"     # relatório em ../projeto-original/reports/audit-project-1.md
 ```
+
 
 ### Validando a refatoração
 
@@ -897,7 +954,7 @@ python app.py                  # http://localhost:5000
 
 # ecommerce-api-legacy
 npm install
-npm start                      # http://localhost:3000
+npm start                      # http://localhost:3000 (ou PORT=3100 npm start)
 
 # task-manager-api
 pip install -r requirements.txt

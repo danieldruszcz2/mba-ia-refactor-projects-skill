@@ -16,7 +16,7 @@
         ]
       },
       "ok": true,
-      "ms": 24,
+      "ms": 25,
       "preview": "{\n  \"endpoints\": {\n    \"health\": \"/health\",\n    \"login\": \"/login\",\n    \"pedidos\": \"/pedidos\",\n    \"produtos\": \"/produtos\",\n    \"relatorios\": \"/relatorios/vendas\",\n    \"usuarios\": \"/usuarios\"\n  },\n  \"mensagem\": \"Bem-vindo \\u00e0 API da Loja\",\n  \"versao\": \"1.0.0\"\n}\n"
     },
     {
@@ -39,7 +39,7 @@
         ]
       },
       "ok": true,
-      "ms": 2,
+      "ms": 17,
       "preview": "{\n  \"ambiente\": \"producao\",\n  \"counts\": {\n    \"pedidos\": 0,\n    \"produtos\": 10,\n    \"usuarios\": 3\n  },\n  \"database\": \"connected\",\n  \"db_path\": \"loja.db\",\n  \"debug\": true,\n  \"secret_key\": \"minha-chave-super-secreta-123\",\n  \"status\": \"ok\",\n  \"versao\": \"1.0.0\"\n}\n"
     },
     {
@@ -56,8 +56,8 @@
         ]
       },
       "ok": true,
-      "ms": 12,
-      "preview": "{\n  \"dados\": [\n    {\n      \"ativo\": 1,\n      \"categoria\": \"informatica\",\n      \"criado_em\": \"2026-11-01 19:46:16\",\n      \"descricao\": \"Notebook potente para jogos\",\n      \"estoque\": 10,\n      \"id\": 1,\n      \"nome\": \"Notebook Gamer\",\n      \"preco\": 5999.99\n    },\n    {\n      \"ativo\": 1,\n      \"catego"
+      "ms": 15,
+      "preview": "{\n  \"dados\": [\n    {\n      \"ativo\": 1,\n      \"categoria\": \"informatica\",\n      \"criado_em\": \"2026-11-08 01:21:18\",\n      \"descricao\": \"Notebook potente para jogos\",\n      \"estoque\": 10,\n      \"id\": 1,\n      \"nome\": \"Notebook Gamer\",\n      \"preco\": 5999.99\n    },\n    {\n      \"ativo\": 1,\n      \"catego"
     },
     {
       "name": "busca-produtos",
@@ -74,8 +74,8 @@
         ]
       },
       "ok": true,
-      "ms": 3,
-      "preview": "{\n  \"dados\": [\n    {\n      \"ativo\": 1,\n      \"categoria\": \"informatica\",\n      \"criado_em\": \"2026-11-01 19:46:16\",\n      \"descricao\": \"Mouse sem fio ergon\\u00f4mico\",\n      \"estoque\": 50,\n      \"id\": 2,\n      \"nome\": \"Mouse Wireless\",\n      \"preco\": 89.9\n    }\n  ],\n  \"sucesso\": true,\n  \"total\": 1\n}\n"
+      "ms": 18,
+      "preview": "{\n  \"dados\": [\n    {\n      \"ativo\": 1,\n      \"categoria\": \"informatica\",\n      \"criado_em\": \"2026-11-08 01:21:18\",\n      \"descricao\": \"Mouse sem fio ergon\\u00f4mico\",\n      \"estoque\": 50,\n      \"id\": 2,\n      \"nome\": \"Mouse Wireless\",\n      \"preco\": 89.9\n    }\n  ],\n  \"sucesso\": true,\n  \"total\": 1\n}\n"
     },
     {
       "name": "busca-produtos-preco-invalido",
@@ -90,11 +90,11 @@
         ]
       },
       "ok": false,
-      "ms": 12,
+      "ms": 1,
       "preview": "{\n  \"erro\": \"could not convert string to float: 'abc'\"\n}\n"
     },
     {
-      "name": "get-produto-seed",
+      "name": "get-produto",
       "method": "GET",
       "path": "/produtos/1",
       "status": 200,
@@ -107,8 +107,8 @@
         ]
       },
       "ok": true,
-      "ms": 15,
-      "preview": "{\n  \"dados\": {\n    \"ativo\": 1,\n    \"categoria\": \"informatica\",\n    \"criado_em\": \"2026-11-01 19:46:16\",\n    \"descricao\": \"Notebook potente para jogos\",\n    \"estoque\": 10,\n    \"id\": 1,\n    \"nome\": \"Notebook Gamer\",\n    \"preco\": 5999.99\n  },\n  \"sucesso\": true\n}\n"
+      "ms": 16,
+      "preview": "{\n  \"dados\": {\n    \"ativo\": 1,\n    \"categoria\": \"informatica\",\n    \"criado_em\": \"2026-11-08 01:21:18\",\n    \"descricao\": \"Notebook potente para jogos\",\n    \"estoque\": 10,\n    \"id\": 1,\n    \"nome\": \"Notebook Gamer\",\n    \"preco\": 5999.99\n  },\n  \"sucesso\": true\n}\n"
     },
     {
       "name": "get-produto-404",
@@ -128,90 +128,6 @@
       "preview": "{\n  \"erro\": \"Produto n\\u00e3o encontrado\",\n  \"sucesso\": false\n}\n"
     },
     {
-      "name": "list-usuarios",
-      "method": "GET",
-      "path": "/usuarios",
-      "status": 200,
-      "json": true,
-      "shape": {
-        "type": "object",
-        "keys": [
-          "dados",
-          "sucesso"
-        ]
-      },
-      "ok": true,
-      "ms": 16,
-      "preview": "{\n  \"dados\": [\n    {\n      \"criado_em\": \"2026-11-01 19:46:16\",\n      \"email\": \"admin@loja.com\",\n      \"id\": 1,\n      \"nome\": \"Admin\",\n      \"senha\": \"admin123\",\n      \"tipo\": \"admin\"\n    },\n    {\n      \"criado_em\": \"2026-11-01 19:46:16\",\n      \"email\": \"joao@email.com\",\n      \"id\": 2,\n      \"nome\": "
-    },
-    {
-      "name": "get-usuario-seed",
-      "method": "GET",
-      "path": "/usuarios/1",
-      "status": 200,
-      "json": true,
-      "shape": {
-        "type": "object",
-        "keys": [
-          "dados",
-          "sucesso"
-        ]
-      },
-      "ok": true,
-      "ms": 15,
-      "preview": "{\n  \"dados\": {\n    \"criado_em\": \"2026-11-01 19:46:16\",\n    \"email\": \"admin@loja.com\",\n    \"id\": 1,\n    \"nome\": \"Admin\",\n    \"senha\": \"admin123\",\n    \"tipo\": \"admin\"\n  },\n  \"sucesso\": true\n}\n"
-    },
-    {
-      "name": "get-usuario-404",
-      "method": "GET",
-      "path": "/usuarios/9999",
-      "status": 404,
-      "json": true,
-      "shape": {
-        "type": "object",
-        "keys": [
-          "erro"
-        ]
-      },
-      "ok": true,
-      "ms": 15,
-      "preview": "{\n  \"erro\": \"Usu\\u00e1rio n\\u00e3o encontrado\"\n}\n"
-    },
-    {
-      "name": "list-pedidos",
-      "method": "GET",
-      "path": "/pedidos",
-      "status": 200,
-      "json": true,
-      "shape": {
-        "type": "object",
-        "keys": [
-          "dados",
-          "sucesso"
-        ]
-      },
-      "ok": true,
-      "ms": 16,
-      "preview": "{\n  \"dados\": [],\n  \"sucesso\": true\n}\n"
-    },
-    {
-      "name": "relatorio-vendas",
-      "method": "GET",
-      "path": "/relatorios/vendas",
-      "status": 200,
-      "json": true,
-      "shape": {
-        "type": "object",
-        "keys": [
-          "dados",
-          "sucesso"
-        ]
-      },
-      "ok": true,
-      "ms": 17,
-      "preview": "{\n  \"dados\": {\n    \"desconto_aplicavel\": 0,\n    \"faturamento_bruto\": 0,\n    \"faturamento_liquido\": 0,\n    \"pedidos_aprovados\": 0,\n    \"pedidos_cancelados\": 0,\n    \"pedidos_pendentes\": 0,\n    \"ticket_medio\": 0,\n    \"total_pedidos\": 0\n  },\n  \"sucesso\": true\n}\n"
-    },
-    {
       "name": "create-produto",
       "method": "POST",
       "path": "/produtos",
@@ -226,11 +142,11 @@
         ]
       },
       "ok": true,
-      "ms": 23,
+      "ms": 24,
       "preview": "{\n  \"dados\": {\n    \"id\": 11\n  },\n  \"mensagem\": \"Produto criado\",\n  \"sucesso\": true\n}\n"
     },
     {
-      "name": "create-produto-invalido",
+      "name": "create-produto-400",
       "method": "POST",
       "path": "/produtos",
       "status": 400,
@@ -242,11 +158,11 @@
         ]
       },
       "ok": true,
-      "ms": 24,
+      "ms": 14,
       "preview": "{\n  \"erro\": \"Nome \\u00e9 obrigat\\u00f3rio\"\n}\n"
     },
     {
-      "name": "create-produto-preco-texto",
+      "name": "create-produto-preco-string",
       "method": "POST",
       "path": "/produtos",
       "status": 500,
@@ -262,6 +178,90 @@
       "preview": "{\n  \"erro\": \"'<' not supported between instances of 'str' and 'int'\"\n}\n"
     },
     {
+      "name": "get-produto-criado",
+      "method": "GET",
+      "path": "/produtos/11",
+      "status": 200,
+      "json": true,
+      "shape": {
+        "type": "object",
+        "keys": [
+          "dados",
+          "sucesso"
+        ]
+      },
+      "ok": true,
+      "ms": 15,
+      "preview": "{\n  \"dados\": {\n    \"ativo\": 1,\n    \"categoria\": \"informatica\",\n    \"criado_em\": \"2026-11-08 01:21:24\",\n    \"descricao\": \"Notebook i7 16GB\",\n    \"estoque\": 5,\n    \"id\": 11,\n    \"nome\": \"Notebook Smoke\",\n    \"preco\": 4999.9\n  },\n  \"sucesso\": true\n}\n"
+    },
+    {
+      "name": "update-produto",
+      "method": "PUT",
+      "path": "/produtos/11",
+      "status": 200,
+      "json": true,
+      "shape": {
+        "type": "object",
+        "keys": [
+          "mensagem",
+          "sucesso"
+        ]
+      },
+      "ok": true,
+      "ms": 22,
+      "preview": "{\n  \"mensagem\": \"Produto atualizado\",\n  \"sucesso\": true\n}\n"
+    },
+    {
+      "name": "list-usuarios",
+      "method": "GET",
+      "path": "/usuarios",
+      "status": 200,
+      "json": true,
+      "shape": {
+        "type": "object",
+        "keys": [
+          "dados",
+          "sucesso"
+        ]
+      },
+      "ok": true,
+      "ms": 12,
+      "preview": "{\n  \"dados\": [\n    {\n      \"criado_em\": \"2026-11-08 01:21:18\",\n      \"email\": \"admin@loja.com\",\n      \"id\": 1,\n      \"nome\": \"Admin\",\n      \"senha\": \"admin123\",\n      \"tipo\": \"admin\"\n    },\n    {\n      \"criado_em\": \"2026-11-08 01:21:18\",\n      \"email\": \"joao@email.com\",\n      \"id\": 2,\n      \"nome\": "
+    },
+    {
+      "name": "get-usuario",
+      "method": "GET",
+      "path": "/usuarios/1",
+      "status": 200,
+      "json": true,
+      "shape": {
+        "type": "object",
+        "keys": [
+          "dados",
+          "sucesso"
+        ]
+      },
+      "ok": true,
+      "ms": 2,
+      "preview": "{\n  \"dados\": {\n    \"criado_em\": \"2026-11-08 01:21:18\",\n    \"email\": \"admin@loja.com\",\n    \"id\": 1,\n    \"nome\": \"Admin\",\n    \"senha\": \"admin123\",\n    \"tipo\": \"admin\"\n  },\n  \"sucesso\": true\n}\n"
+    },
+    {
+      "name": "get-usuario-404",
+      "method": "GET",
+      "path": "/usuarios/9999",
+      "status": 404,
+      "json": true,
+      "shape": {
+        "type": "object",
+        "keys": [
+          "erro"
+        ]
+      },
+      "ok": true,
+      "ms": 12,
+      "preview": "{\n  \"erro\": \"Usu\\u00e1rio n\\u00e3o encontrado\"\n}\n"
+    },
+    {
       "name": "create-usuario",
       "method": "POST",
       "path": "/usuarios",
@@ -275,27 +275,29 @@
         ]
       },
       "ok": true,
-      "ms": 23,
+      "ms": 26,
       "preview": "{\n  \"dados\": {\n    \"id\": 4\n  },\n  \"sucesso\": true\n}\n"
     },
     {
-      "name": "create-usuario-invalido",
+      "name": "login-admin",
       "method": "POST",
-      "path": "/usuarios",
-      "status": 400,
+      "path": "/login",
+      "status": 200,
       "json": true,
       "shape": {
         "type": "object",
         "keys": [
-          "erro"
+          "dados",
+          "mensagem",
+          "sucesso"
         ]
       },
       "ok": true,
-      "ms": 27,
-      "preview": "{\n  \"erro\": \"Nome, email e senha s\\u00e3o obrigat\\u00f3rios\"\n}\n"
+      "ms": 11,
+      "preview": "{\n  \"dados\": {\n    \"email\": \"admin@loja.com\",\n    \"id\": 1,\n    \"nome\": \"Admin\",\n    \"tipo\": \"admin\"\n  },\n  \"mensagem\": \"Login OK\",\n  \"sucesso\": true\n}\n"
     },
     {
-      "name": "login-admin",
+      "name": "login-admin-again",
       "method": "POST",
       "path": "/login",
       "status": 200,
@@ -313,7 +315,7 @@
       "preview": "{\n  \"dados\": {\n    \"email\": \"admin@loja.com\",\n    \"id\": 1,\n    \"nome\": \"Admin\",\n    \"tipo\": \"admin\"\n  },\n  \"mensagem\": \"Login OK\",\n  \"sucesso\": true\n}\n"
     },
     {
-      "name": "login-novo-usuario",
+      "name": "login-usuario-criado",
       "method": "POST",
       "path": "/login",
       "status": 200,
@@ -327,11 +329,11 @@
         ]
       },
       "ok": true,
-      "ms": 1,
+      "ms": 18,
       "preview": "{\n  \"dados\": {\n    \"email\": \"carlos.smoke@email.com\",\n    \"id\": 4,\n    \"nome\": \"Carlos Teste\",\n    \"tipo\": \"cliente\"\n  },\n  \"mensagem\": \"Login OK\",\n  \"sucesso\": true\n}\n"
     },
     {
-      "name": "login-senha-errada",
+      "name": "login-401",
       "method": "POST",
       "path": "/login",
       "status": 401,
@@ -344,7 +346,7 @@
         ]
       },
       "ok": true,
-      "ms": 15,
+      "ms": 16,
       "preview": "{\n  \"erro\": \"Email ou senha inv\\u00e1lidos\",\n  \"sucesso\": false\n}\n"
     },
     {
@@ -362,8 +364,24 @@
         ]
       },
       "ok": true,
-      "ms": 16,
+      "ms": 15,
       "preview": "{\n  \"dados\": {\n    \"email\": \"admin@loja.com\",\n    \"id\": 1,\n    \"nome\": \"Admin\",\n    \"tipo\": \"admin\"\n  },\n  \"mensagem\": \"Login OK\",\n  \"sucesso\": true\n}\n"
+    },
+    {
+      "name": "login-sem-body",
+      "method": "POST",
+      "path": "/login",
+      "status": 500,
+      "json": true,
+      "shape": {
+        "type": "object",
+        "keys": [
+          "erro"
+        ]
+      },
+      "ok": false,
+      "ms": 17,
+      "preview": "{\n  \"erro\": \"415 Unsupported Media Type: Did not attempt to load JSON data because the request Content-Type was not 'application/json'.\"\n}\n"
     },
     {
       "name": "create-pedido",
@@ -380,11 +398,11 @@
         ]
       },
       "ok": true,
-      "ms": 9,
+      "ms": 20,
       "preview": "{\n  \"dados\": {\n    \"pedido_id\": 1,\n    \"total\": 479.7\n  },\n  \"mensagem\": \"Pedido criado com sucesso\",\n  \"sucesso\": true\n}\n"
     },
     {
-      "name": "create-pedido-sem-estoque",
+      "name": "create-pedido-estoque",
       "method": "POST",
       "path": "/pedidos",
       "status": 400,
@@ -397,11 +415,11 @@
         ]
       },
       "ok": true,
-      "ms": 22,
+      "ms": 20,
       "preview": "{\n  \"erro\": \"Estoque insuficiente para Mouse Wireless\",\n  \"sucesso\": false\n}\n"
     },
     {
-      "name": "create-pedido-sem-itens",
+      "name": "create-pedido-vazio",
       "method": "POST",
       "path": "/pedidos",
       "status": 400,
@@ -413,142 +431,60 @@
         ]
       },
       "ok": true,
-      "ms": 15,
+      "ms": 1,
       "preview": "{\n  \"erro\": \"Pedido deve ter pelo menos 1 item\"\n}\n"
     },
     {
-      "name": "create-pedido-item-invalido",
+      "name": "create-pedido-quantidade-negativa",
       "method": "POST",
       "path": "/pedidos",
-      "status": 500,
-      "json": true,
-      "shape": {
-        "type": "object",
-        "keys": [
-          "erro"
-        ]
-      },
-      "ok": false,
-      "ms": 16,
-      "preview": "{\n  \"erro\": \"'produto_id'\"\n}\n"
-    },
-    {
-      "name": "get-produto-criado",
-      "method": "GET",
-      "path": "/produtos/11",
-      "status": 200,
+      "status": 201,
       "json": true,
       "shape": {
         "type": "object",
         "keys": [
           "dados",
-          "sucesso"
-        ]
-      },
-      "ok": true,
-      "ms": 15,
-      "preview": "{\n  \"dados\": {\n    \"ativo\": 1,\n    \"categoria\": \"informatica\",\n    \"criado_em\": \"2026-11-01 19:52:34\",\n    \"descricao\": \"Notebook i7 16GB\",\n    \"estoque\": 5,\n    \"id\": 11,\n    \"nome\": \"Smoke Notebook\",\n    \"preco\": 4999.9\n  },\n  \"sucesso\": true\n}\n"
-    },
-    {
-      "name": "get-usuario-criado",
-      "method": "GET",
-      "path": "/usuarios/4",
-      "status": 200,
-      "json": true,
-      "shape": {
-        "type": "object",
-        "keys": [
-          "dados",
-          "sucesso"
-        ]
-      },
-      "ok": true,
-      "ms": 16,
-      "preview": "{\n  \"dados\": {\n    \"criado_em\": \"2026-11-01 19:52:34\",\n    \"email\": \"carlos.smoke@email.com\",\n    \"id\": 4,\n    \"nome\": \"Carlos Teste\",\n    \"senha\": \"senha123\",\n    \"tipo\": \"cliente\"\n  },\n  \"sucesso\": true\n}\n"
-    },
-    {
-      "name": "list-pedidos-depois",
-      "method": "GET",
-      "path": "/pedidos",
-      "status": 200,
-      "json": true,
-      "shape": {
-        "type": "object",
-        "keys": [
-          "dados",
-          "sucesso"
-        ]
-      },
-      "ok": true,
-      "ms": 2,
-      "preview": "{\n  \"dados\": [\n    {\n      \"criado_em\": \"2026-11-01 19:52:34\",\n      \"id\": 1,\n      \"itens\": [\n        {\n          \"preco_unitario\": 89.9,\n          \"produto_id\": 2,\n          \"produto_nome\": \"Mouse Wireless\",\n          \"quantidade\": 2\n        },\n        {\n          \"preco_unitario\": 299.9,\n        "
-    },
-    {
-      "name": "list-pedidos-usuario",
-      "method": "GET",
-      "path": "/pedidos/usuario/4",
-      "status": 200,
-      "json": true,
-      "shape": {
-        "type": "object",
-        "keys": [
-          "dados",
-          "sucesso"
-        ]
-      },
-      "ok": true,
-      "ms": 2,
-      "preview": "{\n  \"dados\": [\n    {\n      \"criado_em\": \"2026-11-01 19:52:34\",\n      \"id\": 1,\n      \"itens\": [\n        {\n          \"preco_unitario\": 89.9,\n          \"produto_id\": 2,\n          \"produto_nome\": \"Mouse Wireless\",\n          \"quantidade\": 2\n        },\n        {\n          \"preco_unitario\": 299.9,\n        "
-    },
-    {
-      "name": "relatorio-vendas-depois",
-      "method": "GET",
-      "path": "/relatorios/vendas",
-      "status": 200,
-      "json": true,
-      "shape": {
-        "type": "object",
-        "keys": [
-          "dados",
-          "sucesso"
-        ]
-      },
-      "ok": true,
-      "ms": 11,
-      "preview": "{\n  \"dados\": {\n    \"desconto_aplicavel\": 0,\n    \"faturamento_bruto\": 479.7,\n    \"faturamento_liquido\": 479.7,\n    \"pedidos_aprovados\": 0,\n    \"pedidos_cancelados\": 0,\n    \"pedidos_pendentes\": 1,\n    \"ticket_medio\": 479.7,\n    \"total_pedidos\": 1\n  },\n  \"sucesso\": true\n}\n"
-    },
-    {
-      "name": "update-produto",
-      "method": "PUT",
-      "path": "/produtos/11",
-      "status": 200,
-      "json": true,
-      "shape": {
-        "type": "object",
-        "keys": [
           "mensagem",
           "sucesso"
         ]
       },
       "ok": true,
-      "ms": 8,
-      "preview": "{\n  \"mensagem\": \"Produto atualizado\",\n  \"sucesso\": true\n}\n"
+      "ms": 21,
+      "preview": "{\n  \"dados\": {\n    \"pedido_id\": 2,\n    \"total\": -449.5\n  },\n  \"mensagem\": \"Pedido criado com sucesso\",\n  \"sucesso\": true\n}\n"
     },
     {
-      "name": "update-produto-404",
-      "method": "PUT",
-      "path": "/produtos/9999",
-      "status": 404,
+      "name": "list-pedidos",
+      "method": "GET",
+      "path": "/pedidos",
+      "status": 200,
       "json": true,
       "shape": {
         "type": "object",
         "keys": [
-          "erro"
+          "dados",
+          "sucesso"
         ]
       },
       "ok": true,
-      "ms": 24,
-      "preview": "{\n  \"erro\": \"Produto n\\u00e3o encontrado\"\n}\n"
+      "ms": 23,
+      "preview": "{\n  \"dados\": [\n    {\n      \"criado_em\": \"2026-11-08 01:21:24\",\n      \"id\": 1,\n      \"itens\": [\n        {\n          \"preco_unitario\": 89.9,\n          \"produto_id\": 2,\n          \"produto_nome\": \"Mouse Wireless\",\n          \"quantidade\": 2\n        },\n        {\n          \"preco_unitario\": 299.9,\n        "
+    },
+    {
+      "name": "list-pedidos-usuario",
+      "method": "GET",
+      "path": "/pedidos/usuario/2",
+      "status": 200,
+      "json": true,
+      "shape": {
+        "type": "object",
+        "keys": [
+          "dados",
+          "sucesso"
+        ]
+      },
+      "ok": true,
+      "ms": 15,
+      "preview": "{\n  \"dados\": [\n    {\n      \"criado_em\": \"2026-11-08 01:21:24\",\n      \"id\": 1,\n      \"itens\": [\n        {\n          \"preco_unitario\": 89.9,\n          \"produto_id\": 2,\n          \"produto_nome\": \"Mouse Wireless\",\n          \"quantidade\": 2\n        },\n        {\n          \"preco_unitario\": 299.9,\n        "
     },
     {
       "name": "update-status-pedido",
@@ -564,11 +500,11 @@
         ]
       },
       "ok": true,
-      "ms": 22,
+      "ms": 7,
       "preview": "{\n  \"mensagem\": \"Status atualizado\",\n  \"sucesso\": true\n}\n"
     },
     {
-      "name": "update-status-invalido",
+      "name": "update-status-pedido-400",
       "method": "PUT",
       "path": "/pedidos/1/status",
       "status": 400,
@@ -580,13 +516,13 @@
         ]
       },
       "ok": true,
-      "ms": 24,
+      "ms": 23,
       "preview": "{\n  \"erro\": \"Status inv\\u00e1lido\"\n}\n"
     },
     {
-      "name": "admin-query",
-      "method": "POST",
-      "path": "/admin/query",
+      "name": "relatorio-vendas",
+      "method": "GET",
+      "path": "/relatorios/vendas",
       "status": 200,
       "json": true,
       "shape": {
@@ -597,14 +533,8 @@
         ]
       },
       "ok": true,
-      "ms": 16,
-      "preview": "{\n  \"dados\": [\n    {\n      \"id\": 1,\n      \"nome\": \"Notebook Gamer\"\n    },\n    {\n      \"id\": 2,\n      \"nome\": \"Mouse Wireless\"\n    },\n    {\n      \"id\": 3,\n      \"nome\": \"Teclado Mec\\u00e2nico\"\n    },\n    {\n      \"id\": 4,\n      \"nome\": \"Monitor 27''\"\n    },\n    {\n      \"id\": 5,\n      \"nome\": \"Headset "
-    },
-    {
-      "name": "admin-reset-db",
-      "method": "POST",
-      "path": "/admin/reset-db",
-      "skipped": "destrutivo: apaga todas as tabelas"
+      "ms": 15,
+      "preview": "{\n  \"dados\": {\n    \"desconto_aplicavel\": 0,\n    \"faturamento_bruto\": 30.2,\n    \"faturamento_liquido\": 30.2,\n    \"pedidos_aprovados\": 1,\n    \"pedidos_cancelados\": 0,\n    \"pedidos_pendentes\": 1,\n    \"ticket_medio\": 15.1,\n    \"total_pedidos\": 2\n  },\n  \"sucesso\": true\n}\n"
     },
     {
       "name": "delete-produto",
@@ -620,7 +550,7 @@
         ]
       },
       "ok": true,
-      "ms": 23,
+      "ms": 21,
       "preview": "{\n  \"mensagem\": \"Produto deletado\",\n  \"sucesso\": true\n}\n"
     },
     {
@@ -636,8 +566,20 @@
         ]
       },
       "ok": true,
-      "ms": 23,
+      "ms": 14,
       "preview": "{\n  \"erro\": \"Produto n\\u00e3o encontrado\"\n}\n"
+    },
+    {
+      "name": "admin-query",
+      "method": "POST",
+      "path": "/admin/query",
+      "skipped": "perigoso: SQL arbitrário"
+    },
+    {
+      "name": "admin-reset-db",
+      "method": "POST",
+      "path": "/admin/reset-db",
+      "skipped": "destrutivo: apaga o banco"
     }
   ]
 }

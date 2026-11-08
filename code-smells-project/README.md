@@ -9,28 +9,35 @@ pip install -r requirements.txt
 python app.py
 ```
 
-A aplicação sobe em `http://localhost:5000`. O banco SQLite (`loja.db`) é criado automaticamente no primeiro boot, já com produtos e usuários de exemplo.
+A aplicação sobe em `http://127.0.0.1:5000`. O banco SQLite (`loja.db`) é criado automaticamente no primeiro boot, já com produtos e usuários de exemplo (senhas gravadas com hash).
 
 ## Configuração
 
-Toda a configuração vem de variáveis de ambiente, documentadas em [`.env.example`](.env.example). Os defaults são seguros para desenvolvimento local:
+Toda a configuração vem de variáveis de ambiente (ver `.env.example`):
 
-- `DEBUG=false` e `HOST=127.0.0.1` (para expor na rede, defina `HOST=0.0.0.0` conscientemente).
-- `SECRET_KEY` vazia gera uma chave aleatória por boot — defina uma fixa em produção.
-- `CORS_ORIGINS` vazio desabilita CORS; informe as origens permitidas separadas por vírgula.
-- Rotas `/admin/*` respondem `403` até que `ENABLE_ADMIN_ROUTES=true` e `ADMIN_TOKEN` sejam definidos; o token vai no header `X-Admin-Token`. `/admin/query` aceita apenas `SELECT` (somente leitura).
+| Variável | Default | Descrição |
+|---|---|---|
+| `SECRET_KEY` | aleatória por processo | Chave de sessão do Flask. **Defina em produção.** |
+| `DEBUG` | `false` | Modo debug do Flask. Nunca ligue em produção. |
+| `HOST` / `PORT` | `127.0.0.1` / `5000` | Endereço de bind. Use `HOST=0.0.0.0` em container. |
+| `APP_ENV` | `producao` | Valor exibido em `/health`. |
+| `LOG_LEVEL` | `INFO` | Nível do `logging`. |
+| `DATABASE_PATH` | `<projeto>/loja.db` | Arquivo SQLite. |
+| `CORS_ORIGINS` | `*` | Origens permitidas, separadas por vírgula. |
+| `ENABLE_ADMIN_ROUTES` | `false` | Liga `/admin/reset-db` e `/admin/query` (desligadas respondem `403`). |
+| `ADMIN_TOKEN` | vazio | Token exigido no header `X-Admin-Token` quando as rotas admin estão ligadas. |
 
-Senhas são armazenadas com hash (scrypt). Bancos antigos com senhas em texto puro são migrados automaticamente no boot.
+`/admin/query` aceita apenas uma instrução `SELECT`, executada numa conexão somente leitura.
 
 ## Estrutura
 
 ```
-app.py          composition root (create_app) e start
-config/         leitura das variáveis de ambiente
-models/         conexão/schema/seed (database.py) e acesso a dados por entidade
+app.py          composition root (create_app)
+config/         leitura do ambiente
+models/         conexão SQLite por requisição, schema/seed e acesso a dados
 services/       regras de pedido, relatório e notificações
 controllers/    fluxo de cada caso de uso
-routes/         Blueprints: mapeamento HTTP → controller
+routes/         Blueprints (mapeamento HTTP → controller)
 middlewares/    error handler central e proteção das rotas admin
-utils/          constantes, erros de domínio, validadores e hashing de senha
+utils/          validação, constantes, erros de domínio e hash de senha
 ```

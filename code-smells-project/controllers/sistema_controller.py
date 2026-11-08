@@ -1,18 +1,18 @@
-"""Casos de uso de sistema: índice, health check e administração."""
 import logging
 
+from flask import current_app, jsonify, request
+
 from models import sistema_model
-from utils.constants import API_VERSAO
+from utils.constants import API_VERSION
 from utils.errors import ValidationError
-from utils.validators import exigir_objeto
 
 logger = logging.getLogger(__name__)
 
 
 def index():
-    return {
+    return jsonify({
         "mensagem": "Bem-vindo à API da Loja",
-        "versao": API_VERSAO,
+        "versao": API_VERSION,
         "endpoints": {
             "produtos": "/produtos",
             "usuarios": "/usuarios",
@@ -21,35 +21,41 @@ def index():
             "relatorios": "/relatorios/vendas",
             "health": "/health",
         },
-    }, 200
+    })
 
 
 def health_check():
     try:
-        contagens = sistema_model.contar_registros()
+        counts = sistema_model.contagens()
     except Exception:
-        # Health check reporta indisponibilidade no próprio formato, sem detalhes internos.
-        logger.exception("Health check falhou")
-        return {"status": "erro", "detalhes": "Banco de dados indisponível"}, 500
-    return {
+        logger.exception("Health check: falha ao acessar o banco")
+        return jsonify({"status": "erro", "detalhes": "Falha ao acessar o banco de dados"}), 500
+    return jsonify({
         "status": "ok",
         "database": "connected",
-        "counts": contagens,
-        "versao": API_VERSAO,
-    }, 200
+        "counts": counts,
+        "versao": API_VERSION,
+        "ambiente": current_app.config["ENVIRONMENT"],
+    }), 200
 
 
-def resetar_banco():
-    sistema_model.resetar_banco()
-    logger.warning("Banco de dados resetado via rota administrativa")
-    return {"mensagem": "Banco de dados resetado", "sucesso": True}, 200
+def reset_database():
+    sistema_model.resetar()
+    logger.warning("Banco de dados resetado via /admin/reset-db")
+    return jsonify({"mensagem": "Banco de dados resetado", "sucesso": True}), 200
 
 
-def executar_query(dados):
-    dados = exigir_objeto(dados, "Query não informada")
-    query = dados.get("sql", "")
-    if not query or not isinstance(query, str):
+def executar_query():
+    dados = request.get_json(silent=True)
+    sql = dados.get("sql", "") if isinstance(dados, dict) else ""
+    if not sql or not isinstance(sql, str):
         raise ValidationError("Query não informada")
-    if not query.strip().upper().startswith("SELECT"):
+    if not sql.strip().upper().startswith("SELECT"):
         raise ValidationError("Apenas consultas SELECT são permitidas")
-    return {"dados": sistema_model.executar_consulta_leitura(query), "sucesso": True}, 200
+    try:
+        resultado = sistema_model.consultar_somente_leitura(sql)
+    except Exception:
+        logger.exception("Falha na consulta administrativa")
+        raise ValidationError("Query inválida")
+    logger.warning("Consulta administrativa executada")
+    return jsonify({"dados": resultado, "sucesso": True}), 200

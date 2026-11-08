@@ -1,105 +1,111 @@
-"""Casos de uso de tasks. Retornam (dados serializáveis, status HTTP)."""
+"""Casos de uso de tasks."""
 import logging
 
-from models import Category, Task, User
-from utils.constants import DEFAULT_PRIORITY, STATUS_DONE, STATUS_PENDING, TASK_STATUSES
-from utils.dates import utc_now
+from models.category import Category
+from models.task import Task
+from models.user import User
+from utils import validators as v
+from utils.constants import DEFAULT_PRIORITY, TASK_STATUS_DONE, TASK_STATUS_PENDING, TASK_STATUSES
+from utils.dates import utcnow
 from utils.errors import NotFoundError, ValidationError
-from utils.stats import calculate_percentage
-from utils.validators import (
-    normalize_tags, parse_due_date, parse_int_query_param, require_json_object,
-    validate_optional_id, validate_priority, validate_status, validate_title,
-)
+from utils.stats import percentage
 
 logger = logging.getLogger(__name__)
+
+TASK_NOT_FOUND = 'Task não encontrada'
 
 
 def _get_task_or_404(task_id):
     task = Task.get_by_id(task_id)
     if not task:
-        raise NotFoundError('Task não encontrada')
+        raise NotFoundError(TASK_NOT_FOUND)
     return task
 
 
-def _validated_user_id(value):
-    user_id = validate_optional_id(value, 'user_id')
+def _ensure_user_exists(user_id):
     if user_id and not User.get_by_id(user_id):
         raise NotFoundError('Usuário não encontrado')
-    return user_id
 
 
-def _validated_category_id(value):
-    category_id = validate_optional_id(value, 'category_id')
+def _ensure_category_exists(category_id):
     if category_id and not Category.get_by_id(category_id):
         raise NotFoundError('Categoria não encontrada')
-    return category_id
 
 
 def list_tasks():
-    now = utc_now()
-    return [task.to_list_item(now) for task in Task.list_with_relations()], 200
+    now = utcnow()
+    return [task.to_list_dict(now) for task in Task.list_with_relations()]
 
 
 def get_task(task_id):
-    return _get_task_or_404(task_id).to_dict_with_overdue(), 200
+    return _get_task_or_404(task_id).to_detail_dict()
 
 
 def create_task(data):
-    data = require_json_object(data)
+    data = v.require_payload(data)
+
     title = data.get('title')
     if not title:
         raise ValidationError('Título é obrigatório')
+    v.validate_title(title)
+
+    description = v.validate_description(data.get('description', ''))
+    status = v.validate_status(data.get('status', TASK_STATUS_PENDING))
+    priority = v.validate_priority(data.get('priority', DEFAULT_PRIORITY))
+    user_id = data.get('user_id')
+    category_id = data.get('category_id')
+    _ensure_user_exists(user_id)
+    _ensure_category_exists(category_id)
 
     task = Task(
-        title=validate_title(title),
-        description=data.get('description', ''),
-        status=validate_status(data.get('status', STATUS_PENDING)),
-        priority=validate_priority(data.get('priority', DEFAULT_PRIORITY)),
-        user_id=_validated_user_id(data.get('user_id')),
-        category_id=_validated_category_id(data.get('category_id')),
+        title=title,
+        description=description,
+        status=status,
+        priority=priority,
+        user_id=user_id,
+        category_id=category_id,
+        due_date=v.validate_due_date(data.get('due_date')),
+        tags=v.normalize_tags(data.get('tags')),
     )
-    if data.get('due_date'):
-        task.due_date = parse_due_date(data['due_date'])
-    if data.get('tags'):
-        task.tags = normalize_tags(data['tags'])
-
     task.save()
-    logger.info('Task criada: %s', task.id)
-    return task.to_dict(), 201
+    logger.info('Task criada: %s - %s', task.id, task.title)
+    return task.to_dict()
 
 
 def update_task(task_id, data):
     task = _get_task_or_404(task_id)
-    data = require_json_object(data)
+    data = v.require_payload(data)
 
     if 'title' in data:
-        task.title = validate_title(data['title'])
+        task.title = v.validate_title(data['title'])
     if 'description' in data:
-        task.description = data['description']
+        task.description = v.validate_description(data['description'])
     if 'status' in data:
-        task.status = validate_status(data['status'])
+        task.status = v.validate_status(data['status'])
     if 'priority' in data:
-        task.priority = validate_priority(data['priority'])
+        task.priority = v.validate_priority(data['priority'])
     if 'user_id' in data:
-        task.user_id = _validated_user_id(data['user_id'])
+        _ensure_user_exists(data['user_id'])
+        task.user_id = data['user_id']
     if 'category_id' in data:
-        task.category_id = _validated_category_id(data['category_id'])
+        _ensure_category_exists(data['category_id'])
+        task.category_id = data['category_id']
     if 'due_date' in data:
-        task.due_date = parse_due_date(data['due_date']) if data['due_date'] else None
+        task.due_date = v.validate_due_date(data['due_date'])
     if 'tags' in data:
-        task.tags = normalize_tags(data['tags'])
+        task.tags = v.normalize_tags(data['tags'])
 
-    task.updated_at = utc_now()
+    task.updated_at = utcnow()
     task.save()
     logger.info('Task atualizada: %s', task.id)
-    return task.to_dict(), 200
+    return task.to_dict()
 
 
 def delete_task(task_id):
     task = _get_task_or_404(task_id)
     task.delete()
     logger.info('Task deletada: %s', task_id)
-    return {'message': 'Task deletada com sucesso'}, 200
+    return {'message': 'Task deletada com sucesso'}
 
 
 def search_tasks(args):
@@ -108,17 +114,20 @@ def search_tasks(args):
     tasks = Task.search(
         text=args.get('q', ''),
         status=args.get('status', ''),
-        priority=parse_int_query_param(priority, 'priority') if priority else None,
-        user_id=parse_int_query_param(user_id, 'user_id') if user_id else None,
+        priority=v.parse_int(priority, 'Prioridade inválida') if priority else None,
+        user_id=v.parse_int(user_id, 'user_id inválido') if user_id else None,
     )
-    return [task.to_dict() for task in tasks], 200
+    return [task.to_dict() for task in tasks]
 
 
 def task_stats():
-    total = Task.count_all()
     by_status = Task.count_by_status()
+    total = Task.count()
+    done = by_status.get(TASK_STATUS_DONE, 0)
     stats = {status: by_status.get(status, 0) for status in TASK_STATUSES}
-    stats['total'] = total
-    stats['overdue'] = Task.count_overdue(utc_now())
-    stats['completion_rate'] = calculate_percentage(by_status.get(STATUS_DONE, 0), total)
-    return stats, 200
+    stats.update({
+        'total': total,
+        'overdue': Task.count_overdue(utcnow()),
+        'completion_rate': percentage(done, total),
+    })
+    return stats

@@ -1,10 +1,7 @@
-'use strict';
-
-// Único módulo que lê variáveis de ambiente. Defaults seguros apenas para desenvolvimento.
-
-function parseBoolean(value, fallback) {
+// Único módulo que lê variáveis de ambiente.
+function parseBoolean(value, fallback = false) {
     if (value === undefined || value === '') return fallback;
-    return ['1', 'true', 'yes', 'on'].includes(String(value).trim().toLowerCase());
+    return ['1', 'true', 'yes', 'on'].includes(String(value).toLowerCase());
 }
 
 function parsePort(value, fallback) {
@@ -15,7 +12,7 @@ function parsePort(value, fallback) {
 function loadConfig(env = process.env) {
     return Object.freeze({
         port: parsePort(env.PORT, 3000),
-        dbPath: env.DB_PATH || ':memory:',
+        databasePath: env.DATABASE_PATH || ':memory:',
         paymentGatewayKey: env.PAYMENT_GATEWAY_KEY || '',
         enableAdminRoutes: parseBoolean(env.ENABLE_ADMIN_ROUTES, false),
         adminToken: env.ADMIN_TOKEN || '',

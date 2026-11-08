@@ -1,5 +1,5 @@
 {
-  "base_url": "http://127.0.0.1:3100",
+  "base_url": "http://127.0.0.1:3000",
   "results": [
     {
       "name": "financial-report-initial",
@@ -16,7 +16,7 @@
         ]
       },
       "ok": true,
-      "ms": 26,
+      "ms": 37,
       "preview": "[{\"course\":\"Clean Architecture\",\"revenue\":997,\"students\":[{\"student\":\"Leonan\",\"paid\":997}]},{\"course\":\"Docker\",\"revenue\":0,\"students\":[]}]"
     },
     {
@@ -33,7 +33,7 @@
         ]
       },
       "ok": true,
-      "ms": 55,
+      "ms": 56,
       "preview": "{\"msg\":\"Sucesso\",\"enrollment_id\":2}"
     },
     {
@@ -67,7 +67,7 @@
         ]
       },
       "ok": true,
-      "ms": 49,
+      "ms": 34,
       "preview": "{\"msg\":\"Sucesso\",\"enrollment_id\":4}"
     },
     {
@@ -78,7 +78,7 @@
       "json": false,
       "shape": null,
       "ok": true,
-      "ms": 2,
+      "ms": 17,
       "preview": "Pagamento recusado"
     },
     {
@@ -89,7 +89,7 @@
       "json": false,
       "shape": null,
       "ok": true,
-      "ms": 16,
+      "ms": 21,
       "preview": "Bad Request"
     },
     {
@@ -118,19 +118,19 @@
         ]
       },
       "ok": true,
-      "ms": 14,
-      "preview": "[{\"course\":\"Clean Architecture\",\"revenue\":1994,\"students\":[{\"student\":\"Leonan\",\"paid\":997},{\"student\":\"Sem Senha\",\"paid\":997}]},{\"course\":\"Docker\",\"revenue\":994,\"students\":[{\"student\":\"Guilherme\",\"paid\":497},{\"student\":\"Leonan\",\"paid\":497}]}]"
+      "ms": 21,
+      "preview": "[{\"course\":\"Clean Architecture\",\"revenue\":1994,\"students\":[{\"student\":\"Leonan\",\"paid\":997},{\"student\":\"Maria\",\"paid\":997}]},{\"course\":\"Docker\",\"revenue\":994,\"students\":[{\"student\":\"Guilherme\",\"paid\":497},{\"student\":\"Leonan\",\"paid\":497}]}]"
     },
     {
       "name": "delete-user",
       "method": "DELETE",
-      "path": "/api/users/1",
+      "path": "/api/users/2",
       "status": 200,
       "json": false,
       "shape": null,
       "ok": true,
-      "ms": 1,
-      "preview": "Usuário deletado."
+      "ms": 2,
+      "preview": "Usuário deletado"
     },
     {
       "name": "financial-report-after-delete",
@@ -147,8 +147,8 @@
         ]
       },
       "ok": true,
-      "ms": 16,
-      "preview": "[{\"course\":\"Clean Architecture\",\"revenue\":997,\"students\":[{\"student\":\"Sem Senha\",\"paid\":997}]},{\"course\":\"Docker\",\"revenue\":497,\"students\":[{\"student\":\"Guilherme\",\"paid\":497}]}]"
+      "ms": 14,
+      "preview": "[{\"course\":\"Clean Architecture\",\"revenue\":1994,\"students\":[{\"student\":\"Leonan\",\"paid\":997},{\"student\":\"Maria\",\"paid\":997}]},{\"course\":\"Docker\",\"revenue\":497,\"students\":[{\"student\":\"Leonan\",\"paid\":497}]}]"
     },
     {
       "name": "checkout-card-not-string",
@@ -158,7 +158,7 @@
       "json": false,
       "shape": null,
       "ok": true,
-      "ms": 16,
+      "ms": 1,
       "preview": "Bad Request"
     }
   ]

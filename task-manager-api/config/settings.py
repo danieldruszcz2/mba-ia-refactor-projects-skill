@@ -37,8 +37,8 @@ class Config:
     # Origens permitidas; lista vazia = CORS desabilitado (nenhuma origem externa).
     CORS_ORIGINS = _env_list('CORS_ORIGINS')
 
-    # Operações administrativas (DELETE /users/<id>, atribuir role admin) respondem
-    # 403 a menos que esta flag seja ligada; ligada, exigem token de um usuário admin.
+    # Operações administrativas (DELETE /users/<id>, atribuir/alterar roles privilegiados)
+    # respondem 403 a menos que esta flag seja ligada; ligada, exigem token de um admin.
     ENABLE_ADMIN_ROUTES = _env_bool('ENABLE_ADMIN_ROUTES', False)
     TOKEN_MAX_AGE_SECONDS = int(os.environ.get('TOKEN_MAX_AGE_SECONDS', '3600'))
 

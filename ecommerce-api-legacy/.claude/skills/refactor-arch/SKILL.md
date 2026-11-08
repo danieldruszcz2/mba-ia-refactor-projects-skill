@@ -1,6 +1,7 @@
 ---
 name: refactor-arch
 description: Analisa, audita e refatora qualquer codebase de backend para uma arquitetura em camadas (MVC), em 3 fases (análise da stack → relatório de auditoria de anti-patterns com severidade → refatoração validada). Agnóstica de linguagem e framework (Python, Node/TypeScript, Java/Kotlin, C#/.NET, Go, PHP, Ruby...). Use sempre que o usuário invocar /refactor-arch ou pedir para auditar arquitetura, encontrar code smells/anti-patterns, revisar boas práticas, detectar APIs deprecated, gerar relatório de auditoria, "organizar o projeto em camadas", separar models/controllers/rotas, limpar código legado ou refatorar um projeto bagunçado — mesmo que ele não mencione "MVC" explicitamente.
+argument-hint: "[número do relatório: 1, 2, 3...]"
 ---
 
 # refactor-arch
@@ -10,10 +11,10 @@ Você vai atuar como um arquiteto de software sênior que herdou um projeto lega
 | Fase | Objetivo | Modifica arquivos? |
 |---|---|---|
 | 1 — Análise | Detectar stack, mapear arquitetura e endpoints, imprimir resumo | Não |
-| 2 — Auditoria | Cruzar o código com o catálogo de anti-patterns, gerar relatório, **pedir confirmação** | Apenas cria `reports/audit-report.md` |
+| 2 — Auditoria | Cruzar o código com o catálogo de anti-patterns, gerar relatório, **pedir confirmação** | Apenas cria o relatório `<raiz do repositório>/reports/audit-project-<N>.md` |
 | 3 — Refatoração | Reestruturar em camadas, eliminar os achados aprovados, **validar** (boot + endpoints) | Sim |
 
-O projeto alvo é o **diretório de trabalho atual** (a raiz do repositório onde a skill foi invocada). Ignore diretórios de dependências, de build e de ferramentas — use o `.gitignore` do projeto e as convenções da stack detectada como guia — além de `.git/`, `.claude/`, `reports/` e lockfiles.
+O projeto alvo é o **diretório de trabalho atual** (o diretório do projeto onde a skill foi invocada). Ignore diretórios de dependências, de build e de ferramentas — use o `.gitignore` do projeto e as convenções da stack detectada como guia — além de `.git/`, `.claude/`, `reports/` e lockfiles.
 
 ## Arquivos de referência
 
@@ -26,7 +27,7 @@ Leia cada arquivo **no momento indicado** — não antes. Eles contêm o conheci
 | `references/anti-patterns-catalog.md` | Início da Fase 2 — catálogo com sinais de detecção e severidade |
 | `references/report-template.md` | Ao montar o relatório da Fase 2 |
 | `references/mvc-guidelines.md` | Início da Fase 3 — regras da arquitetura alvo e responsabilidades de cada camada |
-| `references/refactoring-playbook.md` | Durante a Fase 3 — procedimento de cada transformação |
+| `references/refactoring-playbook.md` | Durante a Fase 3 — procedimento de cada transformação, com exemplo de código antes/depois |
 | `references/validation.md` | Fase 3 — como subir a app, capturar baseline, testar endpoints e comparar |
 | `scripts/smoke_test.py` | Fase 3 — script (stdlib Python 3) que exercita endpoints HTTP e compara com a baseline |
 
@@ -77,7 +78,11 @@ Stack guide:   <references/stacks/<arquivo>.md | nenhum — conhecimento própri
 ================================
 ```
 
-Em seguida liste os endpoints em uma tabela curta (`METHOD /path → arquivo:linha`). Siga para a Fase 2 sem pedir confirmação — a Fase 1 é somente leitura.
+Em seguida liste os endpoints em uma tabela curta (`METHOD /path → arquivo:linha`).
+
+**A impressão do bloco `PHASE 1: PROJECT ANALYSIS` é obrigatória.** Ela é a evidência de que a stack, o domínio e o número de arquivos foram detectados, e o usuário a confere. Não pule nem resuma o bloco, nem o substitua pela linha `Stack:` do relatório. Guarde o texto exato do bloco: ele é repetido na mensagem da Fase 2 e no arquivo do relatório (ver Fase 2). Em modo não interativo só a última mensagem chega ao usuário, e por isso o bloco é repetido.
+
+Siga para a Fase 2 sem pedir confirmação. A Fase 1 é somente leitura.
 
 ---
 
@@ -96,8 +101,17 @@ Regras da auditoria:
 
 Monte o relatório **exatamente** no formato de `references/report-template.md`. Então:
 
-1. Imprima o relatório completo no terminal.
-2. Salve o mesmo conteúdo em `reports/audit-report.md` (crie a pasta `reports/` se necessário). Esta é a **única** escrita permitida antes da confirmação — é um arquivo novo de saída, não altera o código do projeto.
+1. Imprima no terminal, **numa única mensagem e nesta ordem**: (a) o bloco `PHASE 1: PROJECT ANALYSIS` completo, idêntico ao da Fase 1, com a tabela de endpoints; (b) o relatório completo da auditoria; (c) a pergunta de confirmação. Assim o usuário vê as duas fases juntas mesmo quando só a última mensagem é exibida.
+2. Salve no **arquivo de relatório da auditoria** (regra abaixo) o mesmo conteúdo: o bloco da Fase 1 no topo, seguido do relatório e da pergunta de confirmação (ver `report-template.md`). Esta é a **única** escrita permitida antes da confirmação: é um arquivo novo de saída, não altera o código do projeto.
+
+   **Onde salvar o relatório (obrigatório):** `<REPORTS_ROOT>/reports/audit-project-<N>.md`
+   - `<REPORTS_ROOT>` = raiz do repositório git que contém o projeto (`git rev-parse --show-toplevel`, executado no diretório do projeto). Em um monorepo com vários projetos, isso é a pasta **acima** do projeto, e não o próprio projeto. Fora de um repositório git, use o diretório do projeto. Crie a pasta `reports/` se não existir.
+   - `<N>` é escolhido nesta ordem:
+     1. se o usuário passou um número na invocação (`/refactor-arch 2`, `/refactor-arch --report 2`), use esse número. Argumentos recebidos: `$ARGUMENTS`;
+     2. senão, se já existe em `<REPORTS_ROOT>/reports/` um `audit-project-*.md` cuja linha `Project:` é o nome deste projeto, reutilize o mesmo número (sobrescreva o arquivo, pois é uma nova execução no mesmo projeto);
+     3. senão, use o próximo número livre (maior `N` existente + 1, começando em 1).
+   - Imprima o caminho final do arquivo logo após salvar (`Report saved to: <caminho>`).
+   - Os artefatos de validação da Fase 3 (`endpoints.json`, `baseline.json`, `after.json`) continuam em `reports/` **dentro do projeto**, porque pertencem a ele. Só o relatório de auditoria vai para a raiz.
 3. Termine com a pergunta de confirmação e **PARE**. Não modifique nenhum arquivo do projeto, não instale dependências, não compile, não suba servidor. Aguarde a resposta do usuário:
 
 ```
@@ -108,7 +122,7 @@ Phase 2 complete. Proceed with refactoring (Phase 3)? [y/n]
 ```
 
 Interprete a resposta:
-- `n` (ou qualquer negativa) → encerre com uma frase dizendo que nenhum arquivo foi modificado e que o relatório está em `reports/audit-report.md`.
+- `n` (ou qualquer negativa) → encerre com uma frase dizendo que nenhum arquivo foi modificado e informando o caminho do relatório salvo (`<REPORTS_ROOT>/reports/audit-project-<N>.md`).
 - `y` → todos os achados entram no escopo.
 - `y, skip <ids>` → todos exceto os listados. Registre os pulados para o resumo final.
 - Resposta ambígua → pergunte de novo; nunca presuma "sim".

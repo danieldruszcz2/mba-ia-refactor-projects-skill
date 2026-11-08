@@ -1,41 +1,50 @@
 # task-manager-api
 
-API de Task Manager em Python/Flask usada como entrada do desafio `refactor-arch`. Diferente dos outros projetos, este já possui alguma separação de camadas (`models/`, `routes/`, `services/`, `utils/`), mas ainda contém problemas arquiteturais e de qualidade.
+API de Task Manager em Python/Flask (tasks, usuários, categorias e relatórios), organizada em camadas:
+
+```
+app.py            composition root (create_app) — monta config, banco, error handlers e rotas
+config/           leitura de variáveis de ambiente (único módulo que lê o ambiente)
+models/           entidades SQLAlchemy + todo o acesso a dados (database.py: db, transaction)
+controllers/      casos de uso e regras de negócio
+routes/           Blueprints finos: HTTP → controller
+middlewares/      error handler central e autenticação/autorização
+utils/            constantes, validadores, datas, hash de senha/tokens, erros de domínio
+```
 
 ## Como rodar
 
 ```bash
 pip install -r requirements.txt
+cp .env.example .env   # opcional: ajuste as variáveis
 python seed.py
 python app.py
 ```
 
-A aplicação sobe em `http://localhost:5000`. O `seed.py` popula o banco SQLite (`tasks.db`) com usuários, categorias e tasks de exemplo — **rode-o antes do primeiro boot**, caso contrário os endpoints vão retornar listas vazias.
+A aplicação sobe em `http://localhost:5000`. O `seed.py` popula o banco SQLite (`instance/tasks.db`) com usuários, categorias e tasks de exemplo — **rode-o antes do primeiro boot**, caso contrário os endpoints vão retornar listas vazias.
 
 ## Configuração
 
-A configuração vem de variáveis de ambiente (ou de um arquivo `.env`, lido via `python-dotenv`). Veja `.env.example` para a lista completa:
+Todas as variáveis estão documentadas em `.env.example`. As principais:
 
 | Variável | Default | Descrição |
 |---|---|---|
-| `SECRET_KEY` | aleatória por boot | Assina os tokens de login. **Defina em produção.** |
-| `DATABASE_URL` | `sqlite:///tasks.db` | URL do banco |
-| `HOST` / `PORT` | `127.0.0.1` / `5000` | Bind do servidor (use `HOST=0.0.0.0` só atrás de proxy/container) |
-| `DEBUG` | `false` | Modo debug do Flask (nunca em produção) |
-| `CORS_ORIGINS` | vazio | Origens permitidas, separadas por vírgula |
-| `ENABLE_ADMIN_ROUTES` | `false` | Habilita operações administrativas (`DELETE /users/<id>` e atribuir `role: admin`). Com a flag ligada, exigem `Authorization: Bearer <token>` de um usuário admin (token obtido em `POST /login`). Desligada, respondem `403`. |
-| `TOKEN_MAX_AGE_SECONDS` | `3600` | Validade do token de login |
-| `LOG_LEVEL` | `INFO` | Nível de log |
+| `SECRET_KEY` | aleatória por boot | Assina os tokens de login. Defina em produção. |
+| `DATABASE_URL` | `sqlite:///tasks.db` | URI do banco. |
+| `DEBUG` / `HOST` / `PORT` | `false` / `127.0.0.1` / `5000` | Execução do servidor. |
+| `CORS_ORIGINS` | vazio (CORS desligado) | Origens permitidas, separadas por vírgula. |
+| `ENABLE_ADMIN_ROUTES` | `false` | Habilita operações administrativas. |
+| `TOKEN_MAX_AGE_SECONDS` | `3600` | Validade do token de login. |
+| `LOG_LEVEL` | `INFO` | Nível de log. |
 
-## Estrutura
+## Autenticação e operações administrativas
 
-```
-app.py          composition root (create_app) + start
-config/         leitura das variáveis de ambiente
-models/         entidades + acesso a dados (database.py: db, init, transação)
-controllers/    fluxo de cada caso de uso
-services/       relatórios e tokens de autenticação
-routes/         blueprints (mapeamento HTTP → controller)
-middlewares/    error handler central e autorização admin
-utils/          constantes, validadores, erros de domínio, datas, hash de senha
-```
+`POST /login` devolve um `token` assinado. Envie-o como `Authorization: Bearer <token>`.
+
+As operações abaixo exigem `ENABLE_ADMIN_ROUTES=true` **e** o token de um usuário `admin`; caso contrário respondem `403`:
+
+- `DELETE /users/<id>`
+- criar usuário com role `admin`/`manager` (`POST /users`)
+- alterar o role de um usuário para/de `admin`/`manager` (`PUT /users/<id>`)
+
+Senhas são armazenadas com hash scrypt (Werkzeug). Hashes MD5 legados continuam aceitos no login e são convertidos automaticamente.

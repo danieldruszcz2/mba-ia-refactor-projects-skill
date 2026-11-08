@@ -1,43 +1,31 @@
-"""Composition root: monta config, logging, banco, CORS, error handlers e rotas.
-
-Start: `python app.py` (ou `flask --app app run`, que usa `create_app`).
-"""
+"""Composition root: monta config, logging, banco, middlewares e rotas."""
 import logging
 
 from flask import Flask
 from flask_cors import CORS
 
-from config.settings import load_config
+from config.settings import Config
 from middlewares.error_handler import register_error_handlers
-from models.database import close_connection, init_db
-from routes.pedido_routes import pedido_bp
-from routes.produto_routes import produto_bp
-from routes.sistema_routes import sistema_bp
-from routes.usuario_routes import usuario_bp
+from models import database
+from routes import pedido_routes, produto_routes, sistema_routes, usuario_routes
 
 logger = logging.getLogger(__name__)
 
 
-def create_app(config_overrides=None):
-    config = load_config()
-    config.update(config_overrides or {})
+def create_app(config_class=Config):
+    app = Flask(__name__)
+    app.config.from_object(config_class)
 
     logging.basicConfig(
-        level=config["LOG_LEVEL"],
-        format="%(asctime)s %(levelname)s [%(name)s] %(message)s",
+        level=app.config["LOG_LEVEL"],
+        format="%(asctime)s %(levelname)s %(name)s: %(message)s",
     )
 
-    app = Flask(__name__)
-    app.config.from_mapping(config)
-
-    if config["CORS_ORIGINS"]:
-        CORS(app, origins=config["CORS_ORIGINS"])
-
-    init_db(config["DATABASE_PATH"])
-    app.teardown_appcontext(close_connection)
-
+    CORS(app, origins=app.config["CORS_ORIGINS"])
+    database.init_app(app)
     register_error_handlers(app)
-    for blueprint in (sistema_bp, produto_bp, usuario_bp, pedido_bp):
+
+    for blueprint in (produto_routes.bp, usuario_routes.bp, pedido_routes.bp, sistema_routes.bp):
         app.register_blueprint(blueprint)
 
     return app

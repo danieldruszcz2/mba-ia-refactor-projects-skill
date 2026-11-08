@@ -1,26 +1,25 @@
-from flask import Blueprint, request
+from flask import Blueprint, jsonify, request
 
 from controllers import category_controller
-from routes import respond
 
 category_bp = Blueprint('categories', __name__)
 
 
-@category_bp.get('/categories')
+@category_bp.route('/categories', methods=['GET'])
 def get_categories():
-    return respond(category_controller.list_categories())
+    return jsonify(category_controller.list_categories()), 200
 
 
-@category_bp.post('/categories')
+@category_bp.route('/categories', methods=['POST'])
 def create_category():
-    return respond(category_controller.create_category(request.get_json()))
+    return jsonify(category_controller.create_category(request.get_json())), 201
 
 
-@category_bp.put('/categories/<int:cat_id>')
+@category_bp.route('/categories/<int:cat_id>', methods=['PUT'])
 def update_category(cat_id):
-    return respond(category_controller.update_category(cat_id, request.get_json()))
+    return jsonify(category_controller.update_category(cat_id, request.get_json())), 200
 
 
-@category_bp.delete('/categories/<int:cat_id>')
+@category_bp.route('/categories/<int:cat_id>', methods=['DELETE'])
 def delete_category(cat_id):
-    return respond(category_controller.delete_category(cat_id))
+    return jsonify(category_controller.delete_category(cat_id)), 200

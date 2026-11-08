@@ -1,27 +1,41 @@
-"""Validação de entrada reutilizada por create e update (lança ValidationError → 400)."""
+"""Validação de entrada — funções puras que levantam ValidationError.
+
+Reaproveitadas por create e update para que as regras não divirjam.
+"""
 import re
-from datetime import datetime
 
 from utils.constants import (
-    COLOR_PATTERN, DATE_FORMAT, EMAIL_PATTERN, MAX_PRIORITY, MAX_TITLE_LENGTH,
-    MIN_PASSWORD_LENGTH, MIN_PRIORITY, MIN_TITLE_LENGTH, TASK_STATUSES, USER_ROLES,
+    EMAIL_PATTERN, MAX_PRIORITY, MAX_TITLE_LENGTH, MIN_PASSWORD_LENGTH, MIN_PRIORITY,
+    MIN_TITLE_LENGTH, TASK_STATUSES, USER_ROLES,
 )
+from utils.dates import parse_date
 from utils.errors import ValidationError
 
-
-def _is_int(value):
-    return isinstance(value, int) and not isinstance(value, bool)
+INVALID_DATA = 'Dados inválidos'
 
 
-def require_json_object(data, allow_empty=False):
-    if not isinstance(data, dict) or (not data and not allow_empty):
-        raise ValidationError('Dados inválidos')
+def require_payload(data):
+    if not data or not isinstance(data, dict):
+        raise ValidationError(INVALID_DATA)
     return data
 
 
+def is_number(value):
+    return isinstance(value, (int, float)) and not isinstance(value, bool)
+
+
+def parse_int(value, message):
+    try:
+        return int(value)
+    except (TypeError, ValueError):
+        raise ValidationError(message)
+
+
+# ---- tasks ------------------------------------------------------------------
+
 def validate_title(title):
     if not isinstance(title, str):
-        raise ValidationError('Título inválido')
+        raise ValidationError('Título deve ser um texto')
     if len(title) < MIN_TITLE_LENGTH:
         raise ValidationError('Título muito curto')
     if len(title) > MAX_TITLE_LENGTH:
@@ -29,48 +43,52 @@ def validate_title(title):
     return title
 
 
+def validate_description(description):
+    if description is not None and not isinstance(description, str):
+        raise ValidationError('Descrição inválida')
+    return description
+
+
 def validate_status(status):
-    if status not in TASK_STATUSES:
+    if not isinstance(status, str) or status not in TASK_STATUSES:
         raise ValidationError('Status inválido')
     return status
 
 
 def validate_priority(priority):
-    if not _is_int(priority):
-        raise ValidationError('Prioridade inválida')
-    if priority < MIN_PRIORITY or priority > MAX_PRIORITY:
-        raise ValidationError('Prioridade deve ser entre 1 e 5')
+    if not is_number(priority) or priority < MIN_PRIORITY or priority > MAX_PRIORITY:
+        raise ValidationError(f'Prioridade deve ser entre {MIN_PRIORITY} e {MAX_PRIORITY}')
     return priority
 
 
-def validate_optional_id(value, field):
-    """IDs de relacionamento: ausente/nulo/0 significa "sem vínculo"."""
+def validate_due_date(value):
+    """Retorna datetime ou None (valor vazio limpa a data)."""
     if not value:
-        return value
-    if not _is_int(value):
-        raise ValidationError(f'{field} inválido')
-    return value
-
-
-def parse_due_date(value):
+        return None
     try:
-        return datetime.strptime(value, DATE_FORMAT)
+        return parse_date(value)
     except (TypeError, ValueError):
         raise ValidationError('Formato de data inválido. Use YYYY-MM-DD')
 
 
 def normalize_tags(tags):
-    """Lista de strings → 'a,b'; string e None são mantidos como estão."""
-    if tags is None or isinstance(tags, str):
-        return tags
-    if isinstance(tags, list) and all(isinstance(tag, str) for tag in tags):
+    """Lista de strings → 'a,b'; string é mantida; vazio → None."""
+    if not tags:
+        return None
+    if isinstance(tags, list):
+        if not all(isinstance(tag, str) for tag in tags):
+            raise ValidationError('Tags inválidas')
         return ','.join(tags)
+    if isinstance(tags, str):
+        return tags
     raise ValidationError('Tags inválidas')
 
 
+# ---- users ------------------------------------------------------------------
+
 def validate_name(name):
-    if not name or not isinstance(name, str):
-        raise ValidationError('Nome é obrigatório')
+    if not isinstance(name, str):
+        raise ValidationError('Nome inválido')
     return name
 
 
@@ -80,34 +98,27 @@ def validate_email(email):
     return email
 
 
-def validate_password(password, too_short_message):
-    if not isinstance(password, str):
-        raise ValidationError('Senha inválida')
-    if len(password) < MIN_PASSWORD_LENGTH:
-        raise ValidationError(too_short_message)
+def validate_password(password, message=f'Senha deve ter no mínimo {MIN_PASSWORD_LENGTH} caracteres'):
+    if not isinstance(password, str) or len(password) < MIN_PASSWORD_LENGTH:
+        raise ValidationError(message)
     return password
 
 
 def validate_role(role):
-    if role not in USER_ROLES:
+    if not isinstance(role, str) or role not in USER_ROLES:
         raise ValidationError('Role inválido')
     return role
 
 
-def validate_bool(value, field):
-    if not isinstance(value, bool):
-        raise ValidationError(f'Campo {field} deve ser booleano')
+def validate_active(active):
+    if not isinstance(active, bool):
+        raise ValidationError('Campo active deve ser booleano')
+    return active
+
+
+# ---- categories -------------------------------------------------------------
+
+def validate_optional_text(value, message):
+    if value is not None and not isinstance(value, str):
+        raise ValidationError(message)
     return value
-
-
-def validate_color(color):
-    if not isinstance(color, str) or not re.match(COLOR_PATTERN, color):
-        raise ValidationError('Cor inválida')
-    return color
-
-
-def parse_int_query_param(value, field):
-    try:
-        return int(value)
-    except (TypeError, ValueError):
-        raise ValidationError(f'Parâmetro {field} inválido')

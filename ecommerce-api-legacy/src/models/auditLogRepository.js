@@ -1,9 +1,7 @@
-'use strict';
-
 function createAuditLogRepository(db) {
     return {
-        record(action) {
-            return db.run("INSERT INTO audit_logs (action, created_at) VALUES (?, datetime('now'))", [action]);
+        record(action, conn = db) {
+            return conn.run("INSERT INTO audit_logs (action, created_at) VALUES (?, datetime('now'))", [action]);
         },
     };
 }

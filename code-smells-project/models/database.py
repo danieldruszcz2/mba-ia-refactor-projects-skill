@@ -1,16 +1,11 @@
-"""Conexão SQLite por requisição, transações, schema, seed e migração de senhas."""
-import logging
+"""Conexão SQLite por requisição, schema e seed."""
 import sqlite3
-from contextlib import contextmanager
 
 from flask import current_app, g
 
-from utils.constants import TIPO_USUARIO_CLIENTE
-from utils.security import e_hash_de_senha, hash_senha
+from utils.security import hash_password
 
-logger = logging.getLogger(__name__)
-
-_SCHEMA = (
+SCHEMA = [
     """
     CREATE TABLE IF NOT EXISTS produtos (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -51,9 +46,9 @@ _SCHEMA = (
         preco_unitario REAL
     )
     """,
-)
+]
 
-_PRODUTOS_SEED = [
+SEED_PRODUTOS = [
     ("Notebook Gamer", "Notebook potente para jogos", 5999.99, 10, "informatica"),
     ("Mouse Wireless", "Mouse sem fio ergonômico", 89.90, 50, "informatica"),
     ("Teclado Mecânico", "Teclado mecânico RGB", 299.90, 30, "informatica"),
@@ -66,77 +61,66 @@ _PRODUTOS_SEED = [
     ("Camiseta Dev", "Camiseta estampa código", 59.90, 100, "vestuario"),
 ]
 
-# Senhas de desenvolvimento do seed original; gravadas apenas como hash.
-_USUARIOS_SEED = [
+# Usuários de demonstração (ambiente local); senhas gravadas com hash.
+SEED_USUARIOS = [
     ("Admin", "admin@loja.com", "admin123", "admin"),
-    ("João Silva", "joao@email.com", "123456", TIPO_USUARIO_CLIENTE),
-    ("Maria Santos", "maria@email.com", "senha123", TIPO_USUARIO_CLIENTE),
+    ("João Silva", "joao@email.com", "123456", "cliente"),
+    ("Maria Santos", "maria@email.com", "senha123", "cliente"),
 ]
 
 
-def _conectar(caminho):
-    # isolation_level=None: autocommit; escritas multi-etapa usam `transaction()`.
-    conn = sqlite3.connect(caminho, isolation_level=None)
+def connect(database_path, read_only=False):
+    if read_only:
+        conn = sqlite3.connect("file:" + database_path + "?mode=ro", uri=True)
+    else:
+        conn = sqlite3.connect(database_path)
     conn.row_factory = sqlite3.Row
     return conn
 
 
-def get_connection():
-    """Conexão da requisição atual (aberta sob demanda, fechada no teardown)."""
+def get_db():
     if "db" not in g:
-        g.db = _conectar(current_app.config["DATABASE_PATH"])
+        g.db = connect(current_app.config["DATABASE_PATH"])
     return g.db
 
 
-def close_connection(_exc=None):
+def get_read_only_db():
+    return connect(current_app.config["DATABASE_PATH"], read_only=True)
+
+
+def close_db(_exc=None):
     conn = g.pop("db", None)
     if conn is not None:
         conn.close()
 
 
-@contextmanager
-def transaction(conn):
-    """Executa o bloco numa transação: commit no sucesso, rollback em qualquer erro."""
-    conn.execute("BEGIN IMMEDIATE")
+def _create_schema(conn):
+    with conn:
+        for ddl in SCHEMA:
+            conn.execute(ddl)
+
+
+def _seed(conn):
+    total_produtos = conn.execute("SELECT COUNT(*) FROM produtos").fetchone()[0]
+    if total_produtos > 0:
+        return
+    with conn:
+        conn.executemany(
+            "INSERT INTO produtos (nome, descricao, preco, estoque, categoria) VALUES (?, ?, ?, ?, ?)",
+            SEED_PRODUTOS,
+        )
+        conn.executemany(
+            "INSERT INTO usuarios (nome, email, senha, tipo) VALUES (?, ?, ?, ?)",
+            [(nome, email, hash_password(senha), tipo) for nome, email, senha, tipo in SEED_USUARIOS],
+        )
+
+
+def init_app(app):
+    """Chamado pelo composition root: registra o teardown e prepara schema + seed."""
+    app.teardown_appcontext(close_db)
+    conn = connect(app.config["DATABASE_PATH"])
     try:
-        yield conn
-    except BaseException:
-        conn.rollback()
-        raise
-    else:
-        conn.commit()
-
-
-def init_db(caminho):
-    """Cria o schema, popula o seed (se vazio) e migra senhas legadas em texto puro."""
-    conn = _conectar(caminho)
-    try:
-        with transaction(conn):
-            for ddl in _SCHEMA:
-                conn.execute(ddl)
-
-            if conn.execute("SELECT COUNT(*) FROM produtos").fetchone()[0] == 0:
-                conn.executemany(
-                    "INSERT INTO produtos (nome, descricao, preco, estoque, categoria) VALUES (?, ?, ?, ?, ?)",
-                    _PRODUTOS_SEED,
-                )
-                conn.executemany(
-                    "INSERT INTO usuarios (nome, email, senha, tipo) VALUES (?, ?, ?, ?)",
-                    [(nome, email, hash_senha(senha), tipo) for nome, email, senha, tipo in _USUARIOS_SEED],
-                )
-
-            _migrar_senhas_legadas(conn)
+        _create_schema(conn)
+        _seed(conn)
     finally:
         conn.close()
-
-
-def _migrar_senhas_legadas(conn):
-    legados = [
-        (row["id"], row["senha"])
-        for row in conn.execute("SELECT id, senha FROM usuarios")
-        if row["senha"] and not e_hash_de_senha(row["senha"])
-    ]
-    for usuario_id, senha in legados:
-        conn.execute("UPDATE usuarios SET senha = ? WHERE id = ?", (hash_senha(senha), usuario_id))
-    if legados:
-        logger.warning("Migradas %d senhas legadas em texto puro para hash", len(legados))
